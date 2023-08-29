@@ -69,7 +69,7 @@ public class ValidatorResults implements Serializable {
             final Field field,
             final String validatorName,
             final boolean result,
-            final Object value) {
+            final Serializable value) {
 
         ValidatorResult validatorResult = this.getValidatorResult(field.getKey());
 
@@ -78,7 +78,7 @@ public class ValidatorResults implements Serializable {
             this.hResults.put(field.getKey(), validatorResult);
         }
 
-        validatorResult.add(validatorName, result, (Serializable) value);
+        validatorResult.add(validatorName, result, value);
     }
 
     /**
