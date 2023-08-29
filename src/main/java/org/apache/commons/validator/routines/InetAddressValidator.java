@@ -129,89 +129,146 @@ public class InetAddressValidator implements Serializable {
     public boolean isValidInet6Address(String inet6Address) {
         String[] parts;
         // remove prefix size. This will appear after the zone id (if any)
-        parts = inet6Address.split("/", -1);
-        if (parts.length > 2) {
-            return false; // can only have one prefix specifier
-        }
-        if (parts.length == 2) {
-            if (!parts[1].matches("\\d{1,3}")) {
-                return false; // not a valid number
-            }
-            final int bits = Integer.parseInt(parts[1]); // cannot fail because of RE check
-            if (bits < 0 || bits > MAX_BYTE) {
-                return false; // out of range
-            }
-        }
-        // remove zone-id
-        parts = parts[0].split("%", -1);
-        if (parts.length > 2) {
-            return false;
-        }
-        // The id syntax is implementation independent, but it presumably cannot allow:
-        // whitespace, '/' or '%'
-        if ((parts.length == 2) && !parts[1].matches("[^\\s/%]+")) {
-            return false; // invalid id
-        }
+        parts = getParts(inet6Address);
+        if (parts == null) return false;
+
         inet6Address = parts[0];
         final boolean containsCompressedZeroes = inet6Address.contains("::");
-        if (containsCompressedZeroes && (inet6Address.indexOf("::") != inet6Address.lastIndexOf("::"))) {
-            return false;
-        }
-        if ((inet6Address.startsWith(":") && !inet6Address.startsWith("::"))
-                || (inet6Address.endsWith(":") && !inet6Address.endsWith("::"))) {
-            return false;
-        }
+        if (checkZeros(inet6Address, containsCompressedZeroes)) return false;
+
+        Integer processedOctets = octetProcessing(inet6Address, containsCompressedZeroes);
+        if (processedOctets == null) return false;
+
+        return processedOctets <= IPV6_MAX_HEX_GROUPS && (processedOctets == IPV6_MAX_HEX_GROUPS || containsCompressedZeroes);
+    }
+
+    private Integer octetProcessing(String inet6Address, boolean containsCompressedZeroes) {
         String[] octets = inet6Address.split(":");
-        if (containsCompressedZeroes) {
-            final List<String> octetList = new ArrayList<>(Arrays.asList(octets));
-            if (inet6Address.endsWith("::")) {
-                // String.split() drops ending empty segments
-                octetList.add("");
-            } else if (inet6Address.startsWith("::") && !octetList.isEmpty()) {
-                octetList.remove(0);
-            }
-            octets = octetList.toArray(new String[0]);
-        }
+        octets = getOctets(inet6Address, containsCompressedZeroes, octets);
+
         if (octets.length > IPV6_MAX_HEX_GROUPS) {
-            return false;
+            return null;
         }
+
+        return getValidOctets(octets);
+    }
+
+    private Integer getValidOctets(String[] octets) {
         int validOctets = 0;
         int emptyOctets = 0; // consecutive empty chunks
+
+
         for (int index = 0; index < octets.length; index++) {
             final String octet = octets[index];
             if (octet.isEmpty()) {
                 emptyOctets++;
                 if (emptyOctets > 1) {
-                    return false;
+                    return null;
                 }
             } else {
                 emptyOctets = 0;
                 // Is last chunk an IPv4 address?
-                if (index == octets.length - 1 && octet.contains(".")) {
+                if (isValidOctetStructure(octets, index, octet)) {
                     if (!isValidInet4Address(octet)) {
-                        return false;
+                        return null;
                     }
                     validOctets += 2;
                     continue;
+                } else if (isInvalidOctet(octet))  {
+                    return null;
                 }
-                if (octet.length() > IPV6_MAX_HEX_DIGITS_PER_GROUP) {
-                    return false;
-                }
-                int octetInt = 0;
-                try {
-                    octetInt = Integer.parseInt(octet, BASE_16);
-                } catch (final NumberFormatException e) {
-                    return false;
-                }
-                if (octetInt < 0 || octetInt > MAX_UNSIGNED_SHORT) {
-                    return false;
-                }
+
+
             }
             validOctets++;
         }
-        if (validOctets > IPV6_MAX_HEX_GROUPS || (validOctets < IPV6_MAX_HEX_GROUPS && !containsCompressedZeroes)) {
-            return false;
+        return validOctets;
+    }
+
+    private static boolean isInvalidOctet(String octet) {
+        return octet.length() > IPV6_MAX_HEX_DIGITS_PER_GROUP || checkOctectInt(octet);
+    }
+
+
+    private static boolean isValidOctetStructure(String[] octets, int index, String octet) {
+        return index == octets.length - 1 && octet.contains(".");
+    }
+
+    private static String[] getParts(String inet6Address) {
+        String[] parts;
+        parts = inet6Address.split("/", -1);
+        if (parts.length > 2) {
+            return null;
         }
-        return true;
+        if (checkParts(parts)) return null;
+
+        // remove zone-id
+        parts = removeZoneID(parts);
+        if (parts == null) return null;
+        // The id syntax is implementation independent, but it presumably cannot allow:
+        // whitespace, '/' or '%'
+        if (bitsMatches(parts)) {
+            return null;
+        }
+        return parts;
+    }
+
+    private static String[] removeZoneID(String[] parts) {
+        parts = parts[0].split("%", -1);
+        if (parts.length > 2) {
+            return null;
+        }
+        return parts;
+    }
+
+    private static String[] getOctets(String inet6Address, boolean containsCompressedZeroes, String[] octets) {
+        if (containsCompressedZeroes) {
+            final List<String> octetList = new ArrayList<>(Arrays.asList(octets));
+            checkOctets(inet6Address, octetList);
+            octets = octetList.toArray(new String[0]);
+        }
+        return octets;
+    }
+
+    private static boolean checkOctectInt(String octet) {
+        int octetInt;
+        try {
+            octetInt = Integer.parseInt(octet, BASE_16);
+        } catch (final NumberFormatException e) {
+            return true;
+        }
+        return octetInt < 0 || octetInt > MAX_UNSIGNED_SHORT;
+    }
+
+    private static void checkOctets(String inet6Address, List<String> octetList) {
+        if (inet6Address.endsWith("::")) {
+            // String.split() drops ending empty segments
+            octetList.add("");
+        } else if (inet6Address.startsWith("::") && !octetList.isEmpty()) {
+            octetList.remove(0);
+        }
+    }
+
+    private static boolean checkZeros(String inet6Address, boolean containsCompressedZeroes) {
+        if (containsCompressedZeroes && (inet6Address.indexOf("::") != inet6Address.lastIndexOf("::"))) {
+            return true;
+        }
+        return (inet6Address.startsWith(":") && !inet6Address.startsWith("::"))
+                || (inet6Address.endsWith(":") && !inet6Address.endsWith("::"));
+    }
+
+    private static boolean bitsMatches(String[] parts) {
+        return (parts.length == 2) && !parts[1].matches("[^\\s/%]+");
+    }
+
+    private static boolean checkParts(String[] parts) {
+        if (parts.length == 2) {
+            if (!parts[1].matches("\\d{1,3}")) {
+                return true;
+            }
+            final int bits = Integer.parseInt(parts[1]); // cannot fail because of RE check
+            return bits < 0 || bits > MAX_BYTE;
+        }
+        return false;
     }
 }

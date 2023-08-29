@@ -459,20 +459,15 @@ public class CreditCardValidator implements Serializable {
     }
 
     // package protected for unit test access
-    static CodeValidator createRangeValidator(final CreditCardRange[] creditCardRanges, final CheckDigit digitCheck ) {
+    static CodeValidator createRangeValidator(final CreditCardRange[] creditCardRanges, final CheckDigit digitCheck) {
         return new CodeValidator(new RegexValidator("(\\d+)") {
             private static final long serialVersionUID = 1L;
             private final CreditCardRange[] ccr = creditCardRanges.clone();
 
             @Override
             public String validate(final String value) {
-                if (super.match(value) != null) {
-                    final int length = value.length();
-                    for (final CreditCardRange range : ccr) {
-                        if (isValidCreditCard(length, value, range)) {
-                            return value;
-                        }
-                    }
+                if (super.match(value) != null && isValidCreditCard(value)) {
+                    return value;
                 }
                 return null;
             }
@@ -487,15 +482,18 @@ public class CreditCardValidator implements Serializable {
                 return new String[]{validate(value)};
             }
 
-            private boolean isValidCreditCard(int length, String value, CreditCardRange range) {
-                if (validLength(length, range)) {
-                    return isSinglePrefixValid(value, range) || isRangeValid(value, range);
+            private boolean isValidCreditCard(String value) {
+                int length = value.length();
+                for (CreditCardRange range : ccr) {
+                    if (isValidLength(length, range) && (isSinglePrefixValid(value, range) || isRangeValid(value, range))) {
+                        return true;
+                    }
                 }
                 return false;
             }
 
             private boolean isSinglePrefixValid(String value, CreditCardRange range) {
-                return validLength(value.length(), range) && range.high == null && value.startsWith(range.low);
+                return isValidLength(value.length(), range) && range.high == null && value.startsWith(range.low);
             }
 
             private boolean isRangeValid(String value, CreditCardRange range) {
@@ -503,13 +501,14 @@ public class CreditCardValidator implements Serializable {
                     return range.low.compareTo(value) <= 0 &&
                             range.high.compareTo(value.substring(0, range.high.length())) >= 0;
                 }
-                return false; // Handle the case where range.high is null
+                return false;
             }
 
-            private boolean validLength(int length, CreditCardRange range) {
-                return range.lengths != null ?
-                        contains(range.lengths, length) :
-                        (length >= range.minLen && (range.maxLen == -1 || length <= range.maxLen));
+            private boolean isValidLength(int length, CreditCardRange range) {
+                if (range.lengths != null) {
+                    return contains(range.lengths, length);
+                }
+                return length >= range.minLen && (range.maxLen == -1 || length <= range.maxLen);
             }
 
             private boolean contains(int[] array, int value) {
