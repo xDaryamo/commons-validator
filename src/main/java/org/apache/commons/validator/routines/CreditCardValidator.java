@@ -92,7 +92,7 @@ public class CreditCardValidator implements Serializable {
      * Class that represents a credit card range.
      * @since 1.6
      */
-    public static class CreditCardRange {
+    public static class CreditCardRange implements Serializable{
         final String low; // e.g. 34 or 644
         final String high; // e.g. 34 or 65
         final int minLen; // e.g. 16 or -1
@@ -460,43 +460,69 @@ public class CreditCardValidator implements Serializable {
 
     // package protected for unit test access
     static CodeValidator createRangeValidator(final CreditCardRange[] creditCardRanges, final CheckDigit digitCheck ) {
-        return new CodeValidator(
-                // must be numeric (rest of validation is done later)
-                new RegexValidator("(\\d+)") {
-                    private static final long serialVersionUID = 1L;
-                    private final CreditCardRange[] ccr = creditCardRanges.clone();
-                    @Override
-                    // must return full string
-                    public String validate(final String value) {
-                        if (super.match(value) != null) {
-                            final int length = value.length();
-                            for(final CreditCardRange range : ccr) {
-                                if (validLength(length, range)) {
-                                    if (range.high == null) { // single prefix only
-                                        if (value.startsWith(range.low)) {
-                                            return value;
-                                        }
-                                    } else if (range.low.compareTo(value) <= 0 // no need to trim value here
-                                                &&
-                                                // here we have to ignore digits beyond the prefix
-                                                range.high.compareTo(value.substring(0, range.high.length())) >= 0) {
-                                               return value;
-                                    }
-                                }
-                            }
+        return new CodeValidator(new RegexValidator("(\\d+)") {
+            private static final long serialVersionUID = 1L;
+            private final CreditCardRange[] ccr = creditCardRanges.clone();
+
+            @Override
+            public String validate(final String value) {
+                if (super.match(value) != null) {
+                    final int length = value.length();
+                    for (final CreditCardRange range : ccr) {
+                        if (isValidCreditCard(length, value, range)) {
+                            return value;
                         }
-                        return null;
                     }
-                    @Override
-                    public boolean isValid(final String value) {
-                        return validate(value) != null;
+                }
+                return null;
+            }
+
+            @Override
+            public boolean isValid(final String value) {
+                return validate(value) != null;
+            }
+
+            @Override
+            public String[] match(final String value) {
+                return new String[]{validate(value)};
+            }
+
+            private boolean isValidCreditCard(int length, String value, CreditCardRange range) {
+                if (validLength(length, range)) {
+                    return isSinglePrefixValid(value, range) || isRangeValid(value, range);
+                }
+                return false;
+            }
+
+            private boolean isSinglePrefixValid(String value, CreditCardRange range) {
+                return validLength(value.length(), range) && range.high == null && value.startsWith(range.low);
+            }
+
+            private boolean isRangeValid(String value, CreditCardRange range) {
+                if (range.high != null) {
+                    return range.low.compareTo(value) <= 0 &&
+                            range.high.compareTo(value.substring(0, range.high.length())) >= 0;
+                }
+                return false; // Handle the case where range.high is null
+            }
+
+            private boolean validLength(int length, CreditCardRange range) {
+                return range.lengths != null ?
+                        contains(range.lengths, length) :
+                        (length >= range.minLen && (range.maxLen == -1 || length <= range.maxLen));
+            }
+
+            private boolean contains(int[] array, int value) {
+                for (int item : array) {
+                    if (item == value) {
+                        return true;
                     }
-                    @Override
-                    public String[] match(final String value) {
-                        return new String[] { validate(value) };
-                    }
-                }, digitCheck);
+                }
+                return false;
+            }
+        }, digitCheck);
     }
+
 
     /**
      * Tests whether the given flag is on.  If the flag is not a power of 2

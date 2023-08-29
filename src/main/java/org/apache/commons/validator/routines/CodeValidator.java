@@ -73,7 +73,7 @@ public final class CodeValidator implements Serializable {
     private final RegexValidator regexValidator;
     private final int minLength;
     private final int maxLength;
-    private final CheckDigit checkdigit;
+    private final transient CheckDigit checkdigit;
 
     /**
      * Construct a code validator with a specified regular
