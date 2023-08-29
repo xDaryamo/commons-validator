@@ -524,18 +524,6 @@ public class CreditCardValidator implements Serializable {
     }
 
 
-
-    private static boolean checkSinglePrefix(String value, int length, CreditCardRange range) {
-        return validLength(length, range) && range.high == null && value.startsWith(range.low);
-    }
-
-    private static boolean rangeCompare(String value, CreditCardRange range) {
-        return range.low.compareTo(value) <= 0 // no need to trim value here
-                &&
-                // here we have to ignore digits beyond the prefix
-                range.high.compareTo(value.substring(0, range.high.length())) >= 0;
-    }
-
     /**
      * Tests whether the given flag is on.  If the flag is not a power of 2
      * (ie. 3) this tests whether the combination of flags is on.
