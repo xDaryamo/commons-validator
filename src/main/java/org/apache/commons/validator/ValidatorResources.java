@@ -445,62 +445,47 @@ public class ValidatorResources implements Serializable {
      * @since 1.1
      */
     public Form getForm(final String language, final String country, final String variant,
-            final String formKey) {
+                        final String formKey) {
+        Form form = tryFormLookup(language, country, variant, formKey);
+        if (form == null) {
+            form = tryFormLookup(language, country, null, formKey);
+            if (form == null) {
+                form = tryFormLookup(language, null, null, formKey);
+                if (form == null) {
+                    form = defaultFormSet.getForm(formKey);
+                }
+            }
+        }
 
-        Form form = null;
+        logFormLookupResults(form, language, country, variant, formKey);
 
-        // Try language/country/variant
-        String key = this.buildLocale(language, country, variant);
+        return form;
+    }
+
+    private Form tryFormLookup(String language, String country, String variant, String formKey) {
+        String key = buildLocale(language, country, variant);
         if (!key.isEmpty()) {
             final FormSet formSet = getFormSets().get(key);
             if (formSet != null) {
-                form = formSet.getForm(formKey);
+                return formSet.getForm(formKey);
             }
         }
-        final String localeKey  = key;
+        return null;
+    }
 
-
-        // Try language/country
-        if (form == null) {
-            key = buildLocale(language, country, null);
-            if (!key.isEmpty()) {
-                final FormSet formSet = getFormSets().get(key);
-                if (formSet != null) {
-                    form = formSet.getForm(formKey);
-                }
-            }
-        }
-
-        // Try language
-        if (form == null) {
-            key = buildLocale(language, null, null);
-            if (!key.isEmpty()) {
-                final FormSet formSet = getFormSets().get(key);
-                if (formSet != null) {
-                    form = formSet.getForm(formKey);
-                }
-            }
-        }
-
-        // Try default formset
-        if (form == null) {
-            form = defaultFormSet.getForm(formKey);
-            key = "default";
-        }
-
+    private void logFormLookupResults(Form form, String language, String country, String variant, String formKey) {
+        String localeKey = buildLocale(language, country, variant);
         if (form == null) {
             if (getLog().isWarnEnabled()) {
-                getLog().warn("Form '" + formKey + "' not found for locale '" +
-                         localeKey + "'");
+                getLog().warn("Form '" + formKey + "' not found for locale '" + localeKey + "'");
             }
         } else if (getLog().isDebugEnabled()) {
-            getLog().debug("Form '" + formKey + "' found in formset '" +
-                      key + "' for locale '" + localeKey + "'");
+            String key = buildLocale(language, country, variant);
+            getLog().debug("Form '" + formKey + "' found in formset '" + key + "' for locale '" + localeKey + "'");
         }
-
-        return form;
-
     }
+
+
 
     /**
      * Process the <code>ValidatorResources</code> object. Currently sets the

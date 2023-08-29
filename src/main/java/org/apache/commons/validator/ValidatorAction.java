@@ -16,11 +16,7 @@
  */
 package org.apache.commons.validator;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -778,5 +774,16 @@ public class ValidatorAction implements Serializable {
             log =  LogFactory.getLog(ValidatorAction.class);
         }
         return log;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream stream)
+            throws IOException {
+        stream.defaultWriteObject();
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException, ValidatorException {
+        in.defaultReadObject();
+        // Reinizializza il campo validationMethod qui (ad esempio, chiamando loadValidationMethod)
+        loadValidationMethod();
     }
 }

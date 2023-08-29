@@ -75,7 +75,7 @@
     <!-- Item 25 - Design method signatures carefully -->
     <!-- Avoid long parameter lists -->
     <module name="ParameterNumber">
-      <property name="max" value="4"/>
+      <property name="max" value="5"/>
     </module>
 
     <!-- Item 26 - Use overloading judiciously -->

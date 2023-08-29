@@ -16,6 +16,7 @@
  */
 package org.apache.commons.validator;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
@@ -384,6 +385,16 @@ public class Validator implements Serializable {
      */
     public void setOnlyReturnErrors(final boolean onlyReturnErrors) {
         this.onlyReturnErrors = onlyReturnErrors;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream stream)
+            throws IOException {
+        stream.defaultWriteObject();
+    }
+
+    private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
     }
 
 }
