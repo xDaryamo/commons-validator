@@ -446,19 +446,22 @@ public class ValidatorResources implements Serializable {
      */
     public Form getForm(final String language, final String country, final String variant,
                         final String formKey) {
+        Form form = findForm(language, country, variant, formKey);
+
+        logFormLookupResults(form, language, country, variant, formKey);
+
+        return form != null ? form : defaultFormSet.getForm(formKey);
+    }
+
+    private Form findForm(final String language, final String country, final String variant,
+                          final String formKey) {
         Form form = tryFormLookup(language, country, variant, formKey);
         if (form == null) {
             form = tryFormLookup(language, country, null, formKey);
             if (form == null) {
                 form = tryFormLookup(language, null, null, formKey);
-                if (form == null) {
-                    form = defaultFormSet.getForm(formKey);
-                }
             }
         }
-
-        logFormLookupResults(form, language, country, variant, formKey);
-
         return form;
     }
 
