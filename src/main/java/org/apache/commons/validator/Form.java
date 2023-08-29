@@ -48,7 +48,7 @@ public class Form implements Serializable {
      * in although individual <code>Field</code>s can be retrieved using <code>Map</code>
      * of <code>Field</code>s.
      */
-    private List<Field> lFields = new ArrayList<>();
+    protected List<Field> lFields = new ArrayList<>();
 
     /**
      * Map of <code>Field</code>s keyed on their property value.
