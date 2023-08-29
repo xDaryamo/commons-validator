@@ -482,16 +482,13 @@ public class CreditCardValidator implements Serializable {
 
             private String findRanges(String value, int length) {
                 for (final CreditCardRange range : ccr) {
-                    if (validLength(length, range)) {
-                        if (range.high == null) { // single prefix only
-                            if (value.startsWith(range.low)) {
-                                return value;
-                            }
+                    if (checkSinglePrefix(value, length, range)) { // single prefix only
+                            return value;
+                            
                         } else if (rangeCompare(value, range)) {
                             return value;
                         }
                     }
-                }
                 return null;
             }
 
@@ -505,6 +502,11 @@ public class CreditCardValidator implements Serializable {
                 return new String[]{validate(value)};
             }
         };
+
+    }
+
+    private static boolean checkSinglePrefix(String value, int length, CreditCardRange range) {
+        return validLength(length, range) && range.high == null && value.startsWith(range.low);
     }
 
     private static boolean rangeCompare(String value, CreditCardRange range) {
