@@ -92,7 +92,7 @@ public class CreditCardValidator implements Serializable {
      * Class that represents a credit card range.
      * @since 1.6
      */
-    public static class CreditCardRange {
+    public static class CreditCardRange implements Serializable{
         final String low; // e.g. 34 or 644
         final String high; // e.g. 34 or 65
         final int minLen; // e.g. 16 or -1
