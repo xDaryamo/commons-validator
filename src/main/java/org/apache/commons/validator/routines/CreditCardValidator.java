@@ -466,10 +466,8 @@ public class CreditCardValidator implements Serializable {
 
             @Override
             public String validate(final String value) {
-                if (super.match(value) != null) {
-                    if (isValidCreditCard(value)) {
-                        return value;
-                    }
+                if (super.match(value) != null && isValidCreditCard(value)) {
+                    return value;
                 }
                 return null;
             }
