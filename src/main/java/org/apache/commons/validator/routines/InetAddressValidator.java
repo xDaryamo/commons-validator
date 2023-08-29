@@ -156,6 +156,8 @@ public class InetAddressValidator implements Serializable {
     private Integer getValidOctets(String[] octets) {
         int validOctets = 0;
         int emptyOctets = 0; // consecutive empty chunks
+
+
         for (int index = 0; index < octets.length; index++) {
             final String octet = octets[index];
             if (octet.isEmpty()) {
@@ -172,17 +174,21 @@ public class InetAddressValidator implements Serializable {
                     }
                     validOctets += 2;
                     continue;
-                }
-                if (octet.length() > IPV6_MAX_HEX_DIGITS_PER_GROUP) {
+                } else if (isInvalidOctet(octet))  {
                     return null;
                 }
 
-                if (checkOctectInt(octet)) return null;
+
             }
             validOctets++;
         }
         return validOctets;
     }
+
+    private static boolean isInvalidOctet(String octet) {
+        return octet.length() > IPV6_MAX_HEX_DIGITS_PER_GROUP || checkOctectInt(octet);
+    }
+
 
     private static boolean isValidOctetStructure(String[] octets, int index, String octet) {
         return index == octets.length - 1 && octet.contains(".");
