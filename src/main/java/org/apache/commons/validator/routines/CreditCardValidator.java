@@ -462,40 +462,56 @@ public class CreditCardValidator implements Serializable {
     static CodeValidator createRangeValidator(final CreditCardRange[] creditCardRanges, final CheckDigit digitCheck ) {
         return new CodeValidator(
                 // must be numeric (rest of validation is done later)
-                new RegexValidator("(\\d+)") {
-                    private static final long serialVersionUID = 1L;
-                    private final CreditCardRange[] ccr = creditCardRanges.clone();
-                    @Override
-                    // must return full string
-                    public String validate(final String value) {
-                        if (super.match(value) != null) {
-                            final int length = value.length();
-                            for(final CreditCardRange range : ccr) {
-                                if (validLength(length, range)) {
-                                    if (range.high == null) { // single prefix only
-                                        if (value.startsWith(range.low)) {
-                                            return value;
-                                        }
-                                    } else if (range.low.compareTo(value) <= 0 // no need to trim value here
-                                                &&
-                                                // here we have to ignore digits beyond the prefix
-                                                range.high.compareTo(value.substring(0, range.high.length())) >= 0) {
-                                               return value;
-                                    }
-                                }
+                getRegexValidator(creditCardRanges), digitCheck);
+    }
+
+    private static RegexValidator getRegexValidator(CreditCardRange[] creditCardRanges) {
+        return new RegexValidator("(\\d+)") {
+            private static final long serialVersionUID = 1L;
+            private final CreditCardRange[] ccr = creditCardRanges.clone();
+
+            @Override
+            // must return full string
+            public String validate(final String value) {
+                if (super.match(value) != null) {
+                    final int length = value.length();
+                    return findRanges(value, length);
+                }
+                return null;
+            }
+
+            private String findRanges(String value, int length) {
+                for (final CreditCardRange range : ccr) {
+                    if (validLength(length, range)) {
+                        if (range.high == null) { // single prefix only
+                            if (value.startsWith(range.low)) {
+                                return value;
                             }
+                        } else if (rangeCompare(value, range)) {
+                            return value;
                         }
-                        return null;
                     }
-                    @Override
-                    public boolean isValid(final String value) {
-                        return validate(value) != null;
-                    }
-                    @Override
-                    public String[] match(final String value) {
-                        return new String[] { validate(value) };
-                    }
-                }, digitCheck);
+                }
+                return null;
+            }
+
+            @Override
+            public boolean isValid(final String value) {
+                return validate(value) != null;
+            }
+
+            @Override
+            public String[] match(final String value) {
+                return new String[]{validate(value)};
+            }
+        };
+    }
+
+    private static boolean rangeCompare(String value, CreditCardRange range) {
+        return range.low.compareTo(value) <= 0 // no need to trim value here
+                &&
+                // here we have to ignore digits beyond the prefix
+                range.high.compareTo(value.substring(0, range.high.length())) >= 0;
     }
 
     /**
