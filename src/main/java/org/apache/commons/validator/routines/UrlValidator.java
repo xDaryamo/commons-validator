@@ -381,7 +381,7 @@ public class UrlValidator implements Serializable {
         }
 
         // check manual authority validation if specified
-        if (authorityValidator != null && authorityValidator.isValid(authority)) {
+        if (isValidCustomAuthority(authority)) {
             return true;
         }
         // convert to ASCII if possible
@@ -395,41 +395,53 @@ public class UrlValidator implements Serializable {
         // We have to process IPV6 separately because that is parsed in a different group
         final String ipv6 = authorityMatcher.group(PARSE_AUTHORITY_IPV6);
         if (ipv6 != null) {
-            final InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
-                if (!inetAddressValidator.isValidInet6Address(ipv6)) {
-                    return false;
-                }
+            if (isValidIpv6(ipv6)) return false;
         } else {
-            final String hostLocation = authorityMatcher.group(PARSE_AUTHORITY_HOST_IP);
-            // check if authority is hostname or IP address:
-            // try a hostname first since that's much more likely
-            if (!this.domainValidator.isValid(hostLocation)) {
-                // try an IPv4 address
-                final InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
-                if (!inetAddressValidator.isValidInet4Address(hostLocation)) {
-                    // isn't IPv4, so the URL is invalid
-                    return false;
-                }
-            }
-            final String port = authorityMatcher.group(PARSE_AUTHORITY_PORT);
-            if (port != null && !port.isEmpty()) {
-                try {
-                    final int iPort = Integer.parseInt(port);
-                    if (iPort < 0 || iPort > MAX_UNSIGNED_16_BIT_INT) {
-                        return false;
-                    }
-                } catch (final NumberFormatException nfe) {
-                    return false; // this can happen for big numbers
-                }
-            }
+
+            if (isValidHost(authorityMatcher)) return false;
+
+            if (isValidPort(authorityMatcher)) return false; // this can happen for big numbers
         }
 
         final String extra = authorityMatcher.group(PARSE_AUTHORITY_EXTRA);
-        if (extra != null && !extra.trim().isEmpty()){
-            return false;
-        }
+        return extra == null || extra.trim().isEmpty();
+    }
 
-        return true;
+    private static boolean isValidIpv6(String ipv6) {
+        final InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
+        return !inetAddressValidator.isValidInet6Address(ipv6);
+    }
+
+    private static boolean isValidPort(Matcher authorityMatcher) {
+        final String port = authorityMatcher.group(PARSE_AUTHORITY_PORT);
+        if (port != null && !port.isEmpty()) {
+            try {
+                final int iPort = Integer.parseInt(port);
+                if (iPort < 0 || iPort > MAX_UNSIGNED_16_BIT_INT) {
+                    return true;
+                }
+            } catch (final NumberFormatException nfe) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isValidHost(Matcher authorityMatcher) {
+        final String hostLocation = authorityMatcher.group(PARSE_AUTHORITY_HOST_IP);
+        // check if authority is hostname or IP address:
+        // try a hostname first since that's much more likely
+        if (!this.domainValidator.isValid(hostLocation)) {
+            // try an IPv4 address
+            final InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
+            // isn't IPv4, so the URL is invalid
+            return !inetAddressValidator.isValidInet4Address(hostLocation);
+        }
+        return false;
+    }
+
+    private boolean isValidCustomAuthority(String authority) {
+        return authorityValidator != null && authorityValidator.isValid(authority);
     }
 
     /**
