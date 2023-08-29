@@ -135,18 +135,22 @@ public class InetAddressValidator implements Serializable {
         inet6Address = parts[0];
         final boolean containsCompressedZeroes = inet6Address.contains("::");
         if (checkZeros(inet6Address, containsCompressedZeroes)) return false;
-        
+
+        Integer processedOctets = octetProcessing(inet6Address, containsCompressedZeroes);
+        if (processedOctets == null) return false;
+
+        return processedOctets <= IPV6_MAX_HEX_GROUPS && (processedOctets == IPV6_MAX_HEX_GROUPS || containsCompressedZeroes);
+    }
+
+    private Integer octetProcessing(String inet6Address, boolean containsCompressedZeroes) {
         String[] octets = inet6Address.split(":");
         octets = getOctets(inet6Address, containsCompressedZeroes, octets);
 
         if (octets.length > IPV6_MAX_HEX_GROUPS) {
-            return false;
+            return null;
         }
 
-        Integer validOctets = getValidOctets(octets);
-        if (validOctets == null) return false;
-
-        return validOctets <= IPV6_MAX_HEX_GROUPS && (validOctets == IPV6_MAX_HEX_GROUPS || containsCompressedZeroes);
+        return getValidOctets(octets);
     }
 
     private Integer getValidOctets(String[] octets) {
@@ -162,7 +166,7 @@ public class InetAddressValidator implements Serializable {
             } else {
                 emptyOctets = 0;
                 // Is last chunk an IPv4 address?
-                if (index == octets.length - 1 && octet.contains(".")) {
+                if (isValidOctetStructure(octets, index, octet)) {
                     if (!isValidInet4Address(octet)) {
                         return null;
                     }
@@ -180,6 +184,10 @@ public class InetAddressValidator implements Serializable {
         return validOctets;
     }
 
+    private static boolean isValidOctetStructure(String[] octets, int index, String octet) {
+        return index == octets.length - 1 && octet.contains(".");
+    }
+
     private static String[] getParts(String inet6Address) {
         String[] parts;
         parts = inet6Address.split("/", -1);
@@ -189,13 +197,19 @@ public class InetAddressValidator implements Serializable {
         if (checkParts(parts)) return null;
 
         // remove zone-id
-        parts = parts[0].split("%", -1);
-        if (parts.length > 2) {
-            return null;
-        }
+        parts = removeZoneID(parts);
+        if (parts == null) return null;
         // The id syntax is implementation independent, but it presumably cannot allow:
         // whitespace, '/' or '%'
         if (bitsMatches(parts)) {
+            return null;
+        }
+        return parts;
+    }
+
+    private static String[] removeZoneID(String[] parts) {
+        parts = parts[0].split("%", -1);
+        if (parts.length > 2) {
             return null;
         }
         return parts;
