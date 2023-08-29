@@ -67,7 +67,7 @@ public class ValidatorResult implements Serializable {
      * @param result Whether the validation passed or failed.
      * @param value Value returned by the validator.
      */
-    public void add(final String validatorName, final boolean result, final Object value) {
+    public void add(final String validatorName, final boolean result, final Serializable value) {
         hAction.put(validatorName, new ResultStatus(result, value));
     }
 
@@ -137,14 +137,14 @@ public class ValidatorResult implements Serializable {
         private static final long serialVersionUID = 4076665918535320007L;
 
         private boolean valid;
-        private Object result;
+        private Serializable result;
 
        /**
         * Construct a Result status.
         * @param valid Whether the validator passed or failed.
         * @param result Value returned by the validator.
         */
-        public ResultStatus(final boolean valid, final Object result) {
+        public ResultStatus(final boolean valid, final Serializable result) {
             this.valid = valid;
             this.result = result;
         }
@@ -158,7 +158,7 @@ public class ValidatorResult implements Serializable {
          * @deprecated Use {@code ResultStatus(boolean, Object)} instead
          */
         @Deprecated
-        public ResultStatus(final ValidatorResult ignored, final boolean valid, final Object result) {
+        public ResultStatus(final ValidatorResult ignored, final boolean valid, final Serializable result) {
             this(valid, result);
         }
 
@@ -194,7 +194,7 @@ public class ValidatorResult implements Serializable {
          * typed value of a date validation for example.
          * @param result The value returned by the validation.
          */
-        public void setResult(final Object result) {
+        public void setResult(final Serializable result) {
             this.result = result;
         }
 

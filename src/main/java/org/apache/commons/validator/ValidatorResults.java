@@ -78,7 +78,7 @@ public class ValidatorResults implements Serializable {
             this.hResults.put(field.getKey(), validatorResult);
         }
 
-        validatorResult.add(validatorName, result, value);
+        validatorResult.add(validatorName, result, (Serializable) value);
     }
 
     /**
