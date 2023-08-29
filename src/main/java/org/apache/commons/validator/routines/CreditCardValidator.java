@@ -460,35 +460,20 @@ public class CreditCardValidator implements Serializable {
 
     // package protected for unit test access
     static CodeValidator createRangeValidator(final CreditCardRange[] creditCardRanges, final CheckDigit digitCheck ) {
-        return new CodeValidator(
-                // must be numeric (rest of validation is done later)
-                getRegexValidator(creditCardRanges), digitCheck);
-    }
-
-    private static RegexValidator getRegexValidator(CreditCardRange[] creditCardRanges) {
-        return new RegexValidator("(\\d+)") {
+        return new CodeValidator(new RegexValidator("(\\d+)") {
             private static final long serialVersionUID = 1L;
             private final CreditCardRange[] ccr = creditCardRanges.clone();
 
             @Override
-            // must return full string
             public String validate(final String value) {
                 if (super.match(value) != null) {
                     final int length = value.length();
-                    return findRanges(value, length);
-                }
-                return null;
-            }
-
-            private String findRanges(String value, int length) {
-                for (final CreditCardRange range : ccr) {
-                    if (checkSinglePrefix(value, length, range)) { // single prefix only
-                            return value;
-                            
-                        } else if (rangeCompare(value, range)) {
+                    for (final CreditCardRange range : ccr) {
+                        if (isValidCreditCard(length, value, range)) {
                             return value;
                         }
                     }
+                }
                 return null;
             }
 
@@ -501,9 +486,44 @@ public class CreditCardValidator implements Serializable {
             public String[] match(final String value) {
                 return new String[]{validate(value)};
             }
-        };
 
+            private boolean isValidCreditCard(int length, String value, CreditCardRange range) {
+                if (validLength(length, range)) {
+                    return isSinglePrefixValid(value, range) || isRangeValid(value, range);
+                }
+                return false;
+            }
+
+            private boolean isSinglePrefixValid(String value, CreditCardRange range) {
+                return validLength(value.length(), range) && range.high == null && value.startsWith(range.low);
+            }
+
+            private boolean isRangeValid(String value, CreditCardRange range) {
+                if (range.high != null) {
+                    return range.low.compareTo(value) <= 0 &&
+                            range.high.compareTo(value.substring(0, range.high.length())) >= 0;
+                }
+                return false; // Handle the case where range.high is null
+            }
+
+            private boolean validLength(int length, CreditCardRange range) {
+                return range.lengths != null ?
+                        contains(range.lengths, length) :
+                        (length >= range.minLen && (range.maxLen == -1 || length <= range.maxLen));
+            }
+
+            private boolean contains(int[] array, int value) {
+                for (int item : array) {
+                    if (item == value) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }, digitCheck);
     }
+
+
 
     private static boolean checkSinglePrefix(String value, int length, CreditCardRange range) {
         return validLength(length, range) && range.high == null && value.startsWith(range.low);
