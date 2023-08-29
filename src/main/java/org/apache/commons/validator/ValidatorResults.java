@@ -69,7 +69,7 @@ public class ValidatorResults implements Serializable {
             final Field field,
             final String validatorName,
             final boolean result,
-            final Serializable value) {
+            final Object value) {
 
         ValidatorResult validatorResult = this.getValidatorResult(field.getKey());
 
