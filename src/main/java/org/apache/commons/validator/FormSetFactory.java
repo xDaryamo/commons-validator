@@ -19,6 +19,7 @@ package org.apache.commons.validator;
 import org.apache.commons.digester.AbstractObjectCreationFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.util.FormSetException;
 import org.xml.sax.Attributes;
 
 /**
@@ -66,7 +67,7 @@ public class FormSetFactory extends AbstractObjectCreationFactory {
     private FormSet createFormSet(final ValidatorResources resources,
                                   final String language,
                                   final String country,
-                                  final String variant) throws Exception {
+                                  final String variant) throws FormSetException {
 
         // Retrieve existing FormSet for the language/country/variant
         FormSet formSet = resources.getFormSet(language, country, variant);

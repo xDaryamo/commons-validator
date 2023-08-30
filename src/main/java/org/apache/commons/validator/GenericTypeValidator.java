@@ -367,38 +367,14 @@ public class GenericTypeValidator implements Serializable {
         }
 
         try {
-            // Get the formatters to check against
-            DateFormat formatterShort = null;
-            DateFormat formatterDefault = null;
-            if (locale != null) {
-                formatterShort =
-                        DateFormat.getDateInstance(DateFormat.SHORT, locale);
-                formatterDefault =
-                        DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
-            } else {
-                formatterShort =
-                        DateFormat.getDateInstance(
-                                DateFormat.SHORT,
-                                Locale.getDefault());
-                formatterDefault =
-                        DateFormat.getDateInstance(
-                                DateFormat.DEFAULT,
-                                Locale.getDefault());
-            }
+            DateFormat formatterShort = getFormatter(DateFormat.SHORT, locale);
+            DateFormat formatterDefault = getFormatter(DateFormat.DEFAULT, locale);
 
-            // Turn off lenient parsing
             formatterShort.setLenient(false);
             formatterDefault.setLenient(false);
 
-            // Firstly, try with the short form
-            try {
-                date = formatterShort.parse(value);
-            } catch (final ParseException e) {
-                // Fall back on the default one
-                date = formatterDefault.parse(value);
-            }
+            date = parseDate(value, formatterShort, formatterDefault);
         } catch (final ParseException e) {
-            // Bad date, so LOG and return null
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Date parse failed value=[" + value + "], " +
                         "locale=[" + locale + "] " + e);
@@ -407,6 +383,24 @@ public class GenericTypeValidator implements Serializable {
 
         return date;
     }
+
+    private static DateFormat getFormatter(int style, Locale locale) {
+        if (locale != null) {
+            return DateFormat.getDateInstance(style, locale);
+        } else {
+            return DateFormat.getDateInstance(style, Locale.getDefault());
+        }
+    }
+
+    private static Date parseDate(String value, DateFormat formatterShort, DateFormat formatterDefault) throws ParseException {
+        try {
+            return formatterShort.parse(value);
+        } catch (final ParseException e) {
+            return formatterDefault.parse(value);
+        }
+    }
+
+
 
     /**
      * Checks if the field is a valid date.

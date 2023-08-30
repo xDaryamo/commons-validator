@@ -98,8 +98,6 @@ public class UrlValidator implements Serializable {
 
     private static final String ALPHA_CHARS = "a-zA-Z";
 
-// NOT USED   private static final String ALPHA_NUMERIC_CHARS = ALPHA_CHARS + "\\d";
-
     private static final String SPECIAL_CHARS = ";/@&=,.?:+$";
 
     private static final String VALID_CHARS = "[^\\s" + SPECIAL_CHARS + "]";
@@ -152,7 +150,7 @@ public class UrlValidator implements Serializable {
      */
     private static final int PARSE_AUTHORITY_EXTRA = 3;
 
-    private static final Pattern PATH_PATTERN = Pattern.compile("^(/[-\\w:@&?=+,.!/~*'%$_;]*)?$");
+    private static final Pattern PATH_PATTERN = Pattern.compile("^(/[-\\w:@&?=+,!/~*'\\%$;]*)?$");
 
     private static final Pattern QUERY_PATTERN = Pattern.compile("^(.*)$");
 
