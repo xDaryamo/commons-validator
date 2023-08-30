@@ -466,7 +466,7 @@ public class CreditCardValidator implements Serializable {
 
             @Override
             public String validate(final String value) {
-                if (super.match(value) != null && isValidCreditCard(value)) {
+                if (isValidCreditCard(value)) {
                     return value;
                 }
                 return null;
@@ -483,23 +483,26 @@ public class CreditCardValidator implements Serializable {
             }
 
             private boolean isValidCreditCard(String value) {
-                int length = value.length();
                 for (CreditCardRange range : ccr) {
-                    if (isValidLength(length, range) && (isSinglePrefixValid(value, range) || isRangeValid(value, range))) {
+                    if (isValidRange(value, range)) {
                         return true;
                     }
                 }
                 return false;
             }
 
-            private boolean isSinglePrefixValid(String value, CreditCardRange range) {
-                return isValidLength(value.length(), range) && range.high == null && value.startsWith(range.low);
+            private boolean isValidRange(String value, CreditCardRange range) {
+                int length = value.length();
+                return isValidLength(length, range) && (isValidSinglePrefix(value, range) || isValidRangePrefix(value, range));
             }
 
-            private boolean isRangeValid(String value, CreditCardRange range) {
+            private boolean isValidSinglePrefix(String value, CreditCardRange range) {
+                return range.high == null && value.startsWith(range.low);
+            }
+
+            private boolean isValidRangePrefix(String value, CreditCardRange range) {
                 if (range.high != null) {
-                    return range.low.compareTo(value) <= 0 &&
-                            range.high.compareTo(value.substring(0, range.high.length())) >= 0;
+                    return range.low.compareTo(value) <= 0 && range.high.compareTo(value.substring(0, range.high.length())) >= 0;
                 }
                 return false;
             }
