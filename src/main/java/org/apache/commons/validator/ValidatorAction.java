@@ -715,7 +715,7 @@ public class ValidatorAction implements Serializable {
 
         // Set field clone with the key modified to represent
         // the current field
-        final Field indexedField = (Field) field.clone();
+        final Field indexedField = new Field(field);
         indexedField.setKey(
             ValidatorUtils.replace(
                 indexedField.getKey(),

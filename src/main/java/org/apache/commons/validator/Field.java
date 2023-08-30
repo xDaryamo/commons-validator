@@ -44,7 +44,7 @@ import org.apache.commons.validator.util.ValidatorUtils;
  * @see org.apache.commons.validator.Form
  */
 // TODO mutable non-private fields
-public class Field implements Cloneable, Serializable {
+public class Field implements Serializable {
 
     private static final long serialVersionUID = -8502647722530192185L;
 
@@ -145,6 +145,36 @@ public class Field implements Cloneable, Serializable {
      */
     @SuppressWarnings("unchecked") // cannot instantiate generic array, so have to assume this is OK
     protected Map<String, Arg>[] args = new Map[0];
+
+
+    public Field() {}
+
+    public Field(Field other) {
+        this.property = other.property;
+        this.indexedProperty = other.indexedProperty;
+        this.indexedListProperty = other.indexedListProperty;
+        this.key = other.key;
+        this.depends = other.depends;
+        this.page = other.page;
+        this.clientValidation = other.clientValidation;
+        this.fieldOrder = other.fieldOrder;
+
+        // Clonare gli argomenti
+        this.args = new Map[other.args.length];
+        for (int i = 0; i < other.args.length; i++) {
+            if (other.args[i] != null) {
+                this.args[i] = new HashMap<>(other.args[i]);
+            }
+        }
+
+        // Clonare le variabili (Vars)
+        this.hVars = ValidatorUtils.copyFastHashMap(other.hVars);
+
+        // Clonare i messaggi (Msgs)
+        this.hMsgs = ValidatorUtils.copyFastHashMap(other.hMsgs);
+    }
+
+
 
     /**
      * Gets the page value that the Field is associated with for
@@ -663,37 +693,6 @@ public class Field implements Cloneable, Serializable {
         return Collections.unmodifiableList(this.dependencyList);
     }
 
-    /**
-     * Creates and returns a copy of this object.
-     * @return A copy of the Field.
-     */
-    @Override
-    public Object clone() {
-        Field field = null;
-        try {
-            field = (Field) super.clone();
-        } catch(final CloneNotSupportedException e) {
-            throw new RuntimeException(e.toString());
-        }
-
-        @SuppressWarnings("unchecked") // empty array always OK; cannot check this at compile time
-        final Map<String, Arg>[] tempMap = new Map[this.args.length];
-        field.args = tempMap;
-        for (int i = 0; i < this.args.length; i++) {
-            if (this.args[i] == null) {
-                continue;
-            }
-
-            final Map<String, Arg> argMap = new HashMap<>(this.args[i]);
-            argMap.forEach((validatorName, arg) -> argMap.put(validatorName, new Arg(arg)));
-            field.args[i] = argMap;
-        }
-
-        field.hVars = ValidatorUtils.copyFastHashMap(hVars);
-        field.hMsgs = ValidatorUtils.copyFastHashMap(hMsgs);
-
-        return field;
-    }
 
     /**
      * Returns a string representation of the object.
