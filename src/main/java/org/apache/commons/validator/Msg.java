@@ -125,7 +125,7 @@ public class Msg implements Serializable {
     /**
      * Copy constructor for the Msg class. Creates a new Msg object by copying the values from another Msg object.
      *
-     * @param other The Var object to copy.
+     * @param other The Msg object to copy.
      */
     public Msg(Msg other) {
         this.bundle = other.bundle;

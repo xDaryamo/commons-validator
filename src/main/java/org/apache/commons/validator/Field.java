@@ -149,6 +149,11 @@ public class Field implements Serializable {
 
     public Field() {}
 
+    /**
+     * Copy constructor for the Field class. Creates a new Field object by copying the values from another Field object.
+     *
+     * @param other The Field object to copy.
+     */
     public Field(Field other) {
         this.property = other.property;
         this.indexedProperty = other.indexedProperty;
@@ -159,7 +164,7 @@ public class Field implements Serializable {
         this.clientValidation = other.clientValidation;
         this.fieldOrder = other.fieldOrder;
 
-        // Clonare gli argomenti
+        // Cloning the arguments
         this.args = new Map[other.args.length];
         for (int i = 0; i < other.args.length; i++) {
             if (other.args[i] != null) {
@@ -167,11 +172,6 @@ public class Field implements Serializable {
             }
         }
 
-        // Clonare le variabili (Vars)
-        this.hVars = ValidatorUtils.copyFastHashMap(other.hVars);
-
-        // Clonare i messaggi (Msgs)
-        this.hMsgs = ValidatorUtils.copyFastHashMap(other.hMsgs);
     }
 
 
