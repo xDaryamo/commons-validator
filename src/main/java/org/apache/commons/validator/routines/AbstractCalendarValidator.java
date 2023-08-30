@@ -49,7 +49,7 @@ public abstract class AbstractCalendarValidator extends AbstractFormatValidator 
      * @param dateStyle the date style to use for Locale validation.
      * @param timeStyle the time style to use for Locale validation.
      */
-    public AbstractCalendarValidator(final boolean strict, final int dateStyle, final int timeStyle) {
+    protected AbstractCalendarValidator(final boolean strict, final int dateStyle, final int timeStyle) {
         super(strict);
         this.dateStyle = dateStyle;
         this.timeStyle = timeStyle;

@@ -45,7 +45,7 @@ public abstract class ModulusCheckDigit implements CheckDigit, Serializable {
      *
      * @param modulus The modulus value to use for the check digit calculation
      */
-    public ModulusCheckDigit(final int modulus) {
+    protected ModulusCheckDigit(final int modulus) {
         this.modulus = modulus;
     }
 

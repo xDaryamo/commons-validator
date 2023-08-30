@@ -57,7 +57,7 @@ public abstract class AbstractNumberValidator extends AbstractFormatValidator {
      * @param allowFractions <code>true</code> if fractions are
      *        allowed or <code>false</code> if integers only.
      */
-    public AbstractNumberValidator(final boolean strict, final int formatType, final boolean allowFractions) {
+    protected AbstractNumberValidator(final boolean strict, final int formatType, final boolean allowFractions) {
         super(strict);
         this.allowFractions = allowFractions;
         this.formatType = formatType;
