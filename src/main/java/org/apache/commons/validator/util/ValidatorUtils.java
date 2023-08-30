@@ -141,7 +141,7 @@ public class ValidatorUtils {
             if (value instanceof Msg) {
                 results.put(key, ((Msg) value).clone());
             } else if (value instanceof Arg) {
-                results.put(key, ((Arg) value).clone());
+                results.put(key, new Arg((Arg) value));
             } else if (value instanceof Var) {
                 results.put(key, ((Var) value).clone());
             } else {
@@ -167,7 +167,7 @@ public class ValidatorUtils {
             if (value instanceof Msg) {
                 results.put(key, ((Msg) value).clone());
             } else if (value instanceof Arg) {
-                results.put(key, ((Arg) value).clone());
+                results.put(key, new Arg((Arg) value));
             } else if (value instanceof Var) {
                 results.put(key, ((Var) value).clone());
             } else {

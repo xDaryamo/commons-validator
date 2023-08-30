@@ -34,7 +34,7 @@ import java.io.Serializable;
  * <p>Instances of this class are configured with an &lt;arg&gt; xml element.</p>
  */
 //TODO mutable non-private fields
-public class Arg implements Cloneable, Serializable {
+public class Arg implements Serializable {
 
     private static final long serialVersionUID = -8922606779669839294L;
 
@@ -69,19 +69,29 @@ public class Arg implements Cloneable, Serializable {
      */
     protected boolean resource = true;
 
-    /**
-     * Creates and returns a copy of this object.
-     * @return A copy of this object.
-     */
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
 
-        } catch(final CloneNotSupportedException e) {
-            throw new RuntimeException(e.toString());
-        }
+    /**
+     * This is an empty constructor
+     */
+    public Arg() {
+        //empty constructor
     }
+
+
+    /**
+     * Copy constructor for the Arg class. Creates a new Arg object by copying the values from another Arg object.
+     *
+     * @param other The Arg object to copy.
+     */
+    public Arg(Arg other) {
+        this.bundle = other.bundle;
+        this.key = other.key;
+        this.name = other.name;
+        this.position = other.position;
+        this.resource = other.resource;
+    }
+
+
 
     /**
      * Returns the resource bundle name.

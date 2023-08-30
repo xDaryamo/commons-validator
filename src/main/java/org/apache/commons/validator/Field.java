@@ -685,7 +685,7 @@ public class Field implements Cloneable, Serializable {
             }
 
             final Map<String, Arg> argMap = new HashMap<>(this.args[i]);
-            argMap.forEach((validatorName, arg) -> argMap.put(validatorName, (Arg) arg.clone()));
+            argMap.forEach((validatorName, arg) -> argMap.put(validatorName, new Arg(arg)));
             field.args[i] = argMap;
         }
 
