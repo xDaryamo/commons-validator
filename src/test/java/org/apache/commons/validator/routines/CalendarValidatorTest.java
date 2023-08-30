@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static org.junit.Assert.assertNotEquals;
+
 /**
  * Test Case for CalendarValidator.
  */
@@ -85,7 +87,7 @@ public class CalendarValidatorTest extends AbstractCalendarValidatorTest {
         // Test Time Zone
         final TimeZone zone = (TimeZone.getDefault().getRawOffset() == EET.getRawOffset() ? EST : EET);
         final Date expectedZone = createCalendar(zone, 20051231, 0).getTime();
-        assertFalse("default/EET same ", expected.getTime() == expectedZone.getTime());
+        assertNotEquals("default/EET same ", expected.getTime(), expectedZone.getTime());
 
         assertEquals("validate(C) default", expectedZone, CalendarValidator.getInstance().validate(defaultVal, zone).getTime());
         assertEquals("validate(C) locale ", expectedZone, CalendarValidator.getInstance().validate(localeVal, locale, zone).getTime());
@@ -242,36 +244,36 @@ public class CalendarValidatorTest extends AbstractCalendarValidatorTest {
         final Date dateCET = calCET.getTime();
 
         // Check the dates don't match
-        assertFalse("Check GMT != CET", dateGMT.getTime() == dateCET.getTime());
-        assertFalse("Check GMT != EST", dateGMT.getTime() == dateEST.getTime());
-        assertFalse("Check CET != EST", dateCET.getTime() == dateEST.getTime());
+        assertNotEquals("Check GMT != CET", dateGMT.getTime(), dateCET.getTime());
+        assertNotEquals("Check GMT != CET", dateGMT.getTime(), dateEST.getTime());
+        assertNotEquals("Check GMT != CET", dateCET.getTime(), dateEST.getTime());
 
         // EST to GMT and back
         CalendarValidator.adjustToTimeZone(calEST, GMT);
         assertEquals("EST to GMT", dateGMT, calEST.getTime());
-        assertFalse("Check EST = GMT", dateEST == calEST.getTime());
+        assertNotSame("Check EST = GMT", dateEST, calEST.getTime());
         CalendarValidator.adjustToTimeZone(calEST, EST);
         assertEquals("back to EST", dateEST, calEST.getTime());
-        assertFalse("Check EST != GMT", dateGMT == calEST.getTime());
+        assertNotSame("Check EST != GMT", dateGMT, calEST.getTime());
 
         // CET to GMT and back
         CalendarValidator.adjustToTimeZone(calCET, GMT);
         assertEquals("CET to GMT", dateGMT, calCET.getTime());
-        assertFalse("Check CET = GMT", dateCET == calCET.getTime());
+        assertNotSame("Check CET = GMT", dateCET, calCET.getTime());
         CalendarValidator.adjustToTimeZone(calCET, EET);
         assertEquals("back to CET", dateCET, calCET.getTime());
-        assertFalse("Check CET != GMT", dateGMT == calCET.getTime());
+        assertNotSame("Check CET != GMT", dateGMT, calCET.getTime());
 
         // Adjust to TimeZone with Same rules
         final Calendar calUTC = createCalendar(UTC, DATE_2005_11_23, TIME_12_03_45);
         assertTrue("SAME: UTC = GMT",  UTC.hasSameRules(GMT));
         assertEquals("SAME: Check time (A)", calUTC.getTime(), calGMT.getTime());
-        assertFalse("SAME: Check GMT(A)", GMT.equals(calUTC.getTimeZone()));
-        assertTrue("SAME: Check UTC(A)",  UTC.equals(calUTC.getTimeZone()));
+        assertNotEquals("SAME: Check GMT(A)", GMT, calUTC.getTimeZone());
+        assertEquals("SAME: Check UTC(A)", UTC, calUTC.getTimeZone());
         CalendarValidator.adjustToTimeZone(calUTC, GMT);
         assertEquals("SAME: Check time (B)", calUTC.getTime(), calGMT.getTime());
-        assertTrue("SAME: Check GMT(B)", GMT.equals(calUTC.getTimeZone()));
-        assertFalse("SAME: Check UTC(B)",  UTC.equals(calUTC.getTimeZone()));
+        assertEquals("SAME: Check GMT(B)", GMT, calUTC.getTimeZone());
+        assertNotEquals("SAME: Check UTC(B)", UTC, calUTC.getTimeZone());
     }
 
 }
