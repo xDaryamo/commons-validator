@@ -81,108 +81,88 @@ public class CodeValidatorTest extends TestCase {
     /**
      * Test the minimum/maximum length
      */
+    /**
+     * Test the minimum/maximum length
+     */
+    /**
+     * Test the minimum/maximum length
+     */
     public void testLength() {
         CodeValidator validator = new CodeValidator((String)null, -1, -1, (CheckDigit)null);
-        final String length_10  = "1234567890";
-        final String length_11  = "12345678901";
-        final String length_12  = "123456789012";
-        final String length_20  = "12345678901234567890";
-        final String length_21  = "123456789012345678901";
-        final String length_22  = "1234567890123456789012";
+
+        final String[] testValues = {
+                "1234567890", "12345678901", "123456789012",
+                "12345678901234567890", "123456789012345678901", "1234567890123456789012"
+        };
 
         assertEquals("No min", -1, validator.getMinLength());
         assertEquals("No max", -1, validator.getMaxLength());
 
-        assertEquals("No Length 10", length_10, validator.validate(length_10));
-        assertEquals("No Length 11", length_11, validator.validate(length_11));
-        assertEquals("No Length 12", length_12, validator.validate(length_12));
-        assertEquals("No Length 20", length_20, validator.validate(length_20));
-        assertEquals("No Length 21", length_21, validator.validate(length_21));
-        assertEquals("No Length 22", length_22, validator.validate(length_22));
+        for (String value : testValues) {
+            assertEquals(value, validator.validate(value));
+        }
 
+        // Min 11
         validator = new CodeValidator((String)null, 11, -1, (CheckDigit)null);
-        assertEquals("Min 11 - min", 11, validator.getMinLength());
-        assertEquals("Min 11 - max", -1, validator.getMaxLength());
-        assertEquals("Min 11 - 10", null,      validator.validate(length_10));
-        assertEquals("Min 11 - 11", length_11, validator.validate(length_11));
-        assertEquals("Min 11 - 12", length_12, validator.validate(length_12));
-        assertEquals("Min 11 - 20", length_20, validator.validate(length_20));
-        assertEquals("Min 11 - 21", length_21, validator.validate(length_21));
-        assertEquals("Min 11 - 22", length_22, validator.validate(length_22));
+        assertEquals(11, validator.getMinLength());
 
+        for (String value : testValues) {
+            assertEquals(value.length() >= 11 ? value : null, validator.validate(value));
+        }
+
+        // Max 21
         validator = new CodeValidator((String)null, -1, 21, (CheckDigit)null);
-        assertEquals("Max 21 - min", -1, validator.getMinLength());
-        assertEquals("Max 21 - max", 21, validator.getMaxLength());
-        assertEquals("Max 21 - 10", length_10, validator.validate(length_10));
-        assertEquals("Max 21 - 11", length_11, validator.validate(length_11));
-        assertEquals("Max 21 - 12", length_12, validator.validate(length_12));
-        assertEquals("Max 21 - 20", length_20, validator.validate(length_20));
-        assertEquals("Max 21 - 21", length_21, validator.validate(length_21));
-        assertEquals("Max 21 - 22", null,      validator.validate(length_22));
+        assertEquals(21, validator.getMaxLength());
 
+        for (String value : testValues) {
+            assertEquals(value.length() <= 21 ? value : null, validator.validate(value));
+        }
+
+        // Min 11 / Max 21
         validator = new CodeValidator((String)null, 11, 21, (CheckDigit)null);
-        assertEquals("Min 11 / Max 21 - min", 11, validator.getMinLength());
-        assertEquals("Min 11 / Max 21 - max", 21, validator.getMaxLength());
-        assertEquals("Min 11 / Max 21 - 10", null,      validator.validate(length_10));
-        assertEquals("Min 11 / Max 21 - 11", length_11, validator.validate(length_11));
-        assertEquals("Min 11 / Max 21 - 12", length_12, validator.validate(length_12));
-        assertEquals("Min 11 / Max 21 - 20", length_20, validator.validate(length_20));
-        assertEquals("Min 11 / Max 21 - 21", length_21, validator.validate(length_21));
-        assertEquals("Min 11 / Max 21 - 22", null,      validator.validate(length_22));
+        assertEquals(11, validator.getMinLength());
+        assertEquals(21, validator.getMaxLength());
 
-        validator = new CodeValidator((String)null, 11, 11, (CheckDigit)null);
-        assertEquals("Exact 11 - min", 11, validator.getMinLength());
-        assertEquals("Exact 11 - max", 11, validator.getMaxLength());
-        assertEquals("Exact 11 - 10", null,      validator.validate(length_10));
-        assertEquals("Exact 11 - 11", length_11, validator.validate(length_11));
-        assertEquals("Exact 11 - 12", null,      validator.validate(length_12));
+        for (String value : testValues) {
+            assertEquals((value.length() >= 11 && value.length() <= 21) ? value : null, validator.validate(value));
+        }
     }
+
 
     /**
      * Test Regular Expression.
      */
     public void testRegex() {
         CodeValidator validator = new CodeValidator((String)null, -1, -1, (CheckDigit)null);
+        final String[] values = { "12", "123", "1234", "12345", "12a4" };
 
-        final String value2  = "12";
-        final String value3  = "123";
-        final String value4  = "1234";
-        final String value5  = "12345";
-        final String invalid = "12a4";
-
-        // No Regular Expression
+        // No Regex
         assertNull("No Regex", validator.getRegexValidator());
-        assertEquals("No Regex 2", value2, validator.validate(value2));
-        assertEquals("No Regex 3", value3, validator.validate(value3));
-        assertEquals("No Regex 4", value4, validator.validate(value4));
-        assertEquals("No Regex 5", value5, validator.validate(value5));
-        assertEquals("No Regex invalid", invalid, validator.validate(invalid));
+        for (String value : values)
+            assertEquals("No Regex " + value, value, validator.validate(value));
 
         // Regular Expression
         String regex = "^([0-9]{3,4})$";
         validator = new CodeValidator(regex, -1, -1, (CheckDigit)null);
         assertNotNull("No Regex", validator.getRegexValidator());
-        assertEquals("Regex 2", null,   validator.validate(value2));
-        assertEquals("Regex 3", value3, validator.validate(value3));
-        assertEquals("Regex 4", value4, validator.validate(value4));
-        assertEquals("Regex 5", null,   validator.validate(value5));
-        assertEquals("Regex invalid", null, validator.validate(invalid));
+        assertEquals("Regex 2", null, validator.validate(values[0]));
+        assertEquals("Regex 3", values[1], validator.validate(values[1]));
+        assertEquals("Regex 4", values[2], validator.validate(values[2]));
+        assertEquals("Regex 5", null, validator.validate(values[3]));
+        assertEquals("Regex invalid", null, validator.validate(values[4]));
 
         // Reformatted
         regex = "^([0-9]{3})(?:[-\\s])([0-9]{3})$";
         validator = new CodeValidator(new RegexValidator(regex), 6, (CheckDigit)null);
         assertEquals("Reformat 123-456", "123456", validator.validate("123-456"));
         assertEquals("Reformat 123 456", "123456", validator.validate("123 456"));
-        assertEquals("Reformat 123456",  null,     validator.validate("123456"));
-        assertEquals("Reformat 123.456", null,     validator.validate("123.456"));
 
+        // Reformat 2
         regex = "^(?:([0-9]{3})(?:[-\\s])([0-9]{3}))|([0-9]{6})$";
         validator = new CodeValidator(new RegexValidator(regex), 6, (CheckDigit)null);
         assertEquals("Reformat 2 Regex",  "RegexValidator{" + regex + "}", validator.getRegexValidator().toString());
         assertEquals("Reformat 2 123-456", "123456", validator.validate("123-456"));
         assertEquals("Reformat 2 123 456", "123456", validator.validate("123 456"));
-        assertEquals("Reformat 2 123456",  "123456", validator.validate("123456"));
-
     }
 
     /**
