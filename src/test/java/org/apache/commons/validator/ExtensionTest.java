@@ -303,7 +303,7 @@ public class ExtensionTest extends TestCase {
        final ValidatorResult firstNameResult = results.getValidatorResult("firstName");
        final ValidatorResult lastNameResult = results.getValidatorResult("lastName");
        assertNotNull("First Name ValidatorResult should not be null.", firstNameResult);
-       assertTrue("First Name ValidatorResult for the '" + ACTION +"' action should have '" + CHECK_MSG_KEY + " as a key.", firstNameResult.field.getArg(0).getKey().equals(CHECK_MSG_KEY));
+        assertEquals("First Name ValidatorResult for the '" + ACTION + "' action should have '" + CHECK_MSG_KEY + " as a key.", firstNameResult.field.getArg(0).getKey(), CHECK_MSG_KEY);
 
        assertNull("Last Name ValidatorResult should be null.", lastNameResult);
     }
@@ -319,24 +319,24 @@ public class ExtensionTest extends TestCase {
        final Form form2 = resources.getForm(ValidatorResources.defaultLocale, FORM_KEY2);
 
        assertNotNull(FORM_KEY + " is null.", form);
-       assertTrue("There should only be 2 fields in " + FORM_KEY, form.getFields().size() == 2);
+        assertEquals("There should only be 2 fields in " + FORM_KEY, 2, form.getFields().size());
 
        assertNotNull(FORM_KEY2 + " is null.", form2);
-       assertTrue("There should only be 2 fields in " + FORM_KEY2, form2.getFields().size() == 2);
+        assertEquals("There should only be 2 fields in " + FORM_KEY2, 2, form2.getFields().size());
 
        //get the first field
        Field fieldFirstName = form.getFields().get(0);
        //get the second field
        Field fieldLastName = form.getFields().get(1);
-       assertTrue("firstName in " + FORM_KEY + " should be the first in the list", fieldFirstName.getKey().equals("firstName"));
-       assertTrue("lastName in " + FORM_KEY + " should be the first in the list", fieldLastName.getKey().equals("lastName"));
+        assertEquals("firstName in " + FORM_KEY + " should be the first in the list", "firstName", fieldFirstName.getKey());
+        assertEquals("lastName in " + FORM_KEY + " should be the first in the list", "lastName", fieldLastName.getKey());
 
 //     get the second field
        fieldLastName = form2.getFields().get(0);
         //get the first field
         fieldFirstName = form2.getFields().get(1);
-        assertTrue("firstName in " + FORM_KEY2 + " should be the first in the list", fieldFirstName.getKey().equals("firstName"));
-       assertTrue("lastName in " + FORM_KEY2 + " should be the first in the list", fieldLastName.getKey().equals("lastName"));
+        assertEquals("firstName in " + FORM_KEY2 + " should be the first in the list", "firstName", fieldFirstName.getKey());
+        assertEquals("lastName in " + FORM_KEY2 + " should be the first in the list", "lastName", fieldLastName.getKey());
 
     }
 }
