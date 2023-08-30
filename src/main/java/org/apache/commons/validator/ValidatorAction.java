@@ -502,14 +502,14 @@ public class ValidatorAction implements Serializable {
         return results.toString();
     }
 
-    private Object invokeValidationMethod(Method validationMethod, Object validationClassInstance, Object[] paramValues) throws ValidatorException, Exception {
+    private Object invokeValidationMethod(Method validationMethod, Object validationClassInstance, Object[] paramValues) throws ValidatorException {
         try {
             return validationMethod.invoke(validationClassInstance, paramValues);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new ValidatorException(e.getMessage());
         } catch (final InvocationTargetException e) {
             if (e.getTargetException() instanceof Exception) {
-                throw (Exception) e.getTargetException();
+                throw (ValidatorException) e.getTargetException();
             }
             if (e.getTargetException() instanceof Error) {
                 throw (Error) e.getTargetException();
@@ -555,7 +555,7 @@ public class ValidatorAction implements Serializable {
             Object result = invokeValidationMethod(validationMethod, getValidationClassInstance(), paramValues);
 
             final boolean valid = this.isValid(result);
-            if (!valid || (valid && !onlyReturnErrors(params))) {
+            if (!valid || !onlyReturnErrors(params)) {
                 results.add(field, this.name, valid, result);
             }
 
