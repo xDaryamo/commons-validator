@@ -45,16 +45,14 @@ public class EmailValidator {
 
     private static final String SPECIAL_CHARS = "\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]";
     private static final String VALID_CHARS = "[^\\s" + SPECIAL_CHARS + "]";
-    private static final String QUOTED_USER = "(\"[^\"]*\")";
+    private static final String QUOTED_USER = "\"[^\"]*\"";
     private static final String ATOM = VALID_CHARS + '+';
-    private static final String WORD = "((" + VALID_CHARS + "|')+|" + QUOTED_USER + ")";
+    private static final String WORD = "(" + ATOM + "|" + QUOTED_USER + ")";
 
-// NOT USED   private static final Pattern LEGAL_ASCII_PATTERN = Pattern.compile("^\\p{ASCII}+$");
-// NOT USED   private static final Pattern EMAIL_PATTERN = Pattern.compile("^(.+)@(.+)$");
     private static final Pattern IP_DOMAIN_PATTERN = Pattern.compile("^\\[(.*)\\]$");
     private static final Pattern TLD_PATTERN = Pattern.compile("^([a-zA-Z]+)$");
 
-    private static final Pattern USER_PATTERN = Pattern.compile("^\\s*" + WORD + "(\\." + WORD + ")*$");
+    private static final Pattern USER_PATTERN = Pattern.compile("^\\s*" + WORD + "(?:\\\\.\" + WORD + \")*$");
     private static final Pattern DOMAIN_PATTERN = Pattern.compile("^" + ATOM + "(\\." + ATOM + ")*\\s*$");
     private static final Pattern ATOM_PATTERN = Pattern.compile("(" + ATOM + ")");
 
@@ -113,11 +111,7 @@ public class EmailValidator {
         if (!symbolic) {
             return false;
         }
-        if (!isValidSymbolicDomain(domain)) {
-            return false;
-        }
-
-        return true;
+        return isValidSymbolicDomain(domain);
     }
 
     /**
@@ -193,11 +187,7 @@ public class EmailValidator {
         if (tld.length() <= 1) {
             return false;
         }
-        if (! TLD_PATTERN.matcher(tld).matches()) {
-            return false;
-        }
-
-        return true;
+        return TLD_PATTERN.matcher(tld).matches();
     }
     /**
      *   Recursively remove comments, and replace with a single space.  The simpler
@@ -209,7 +199,7 @@ public class EmailValidator {
     */
     protected String stripComments(final String emailStr)  {
      String result = emailStr;
-     final String commentPat = "^((?:[^\"\\\\]|\\\\.)*(?:\"(?:[^\"\\\\]|\\\\.)*\"(?:[^\"\\\\]|\111111\\\\.)*)*)\\((?:[^()\\\\]|\\\\.)*\\)/";
+     final String commentPat = "^((?:[^\"\\\\]|\\\\.)*+)\"((?:[^\"\\\\]|\\\\.)*+)\"\\((?:[^()\\\\]|\\\\.)*+\\)/\n/";
      final Pattern commentMatcher = Pattern.compile(commentPat);
 
      while (commentMatcher.matcher(result).matches()) {
