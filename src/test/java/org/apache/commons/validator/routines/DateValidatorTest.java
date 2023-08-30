@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static org.junit.Assert.assertNotEquals;
+
 /**
  * Test Case for DateValidator.
  */
@@ -100,7 +102,8 @@ public class DateValidatorTest extends AbstractCalendarValidatorTest {
         // Test Time Zone
         final TimeZone zone = (TimeZone.getDefault().getRawOffset() == EET.getRawOffset() ? EST : EET);
         final Date expectedZone = createCalendar(zone, 20051231, 0).getTime();
-        assertFalse("default/zone same "+zone, expected.getTime() == expectedZone.getTime());
+        assertNotEquals("default/zone same " + zone, expected.getTime(), expectedZone.getTime());
+
 
         assertEquals("validate(C) default", expectedZone, DateValidator.getInstance().validate(defaultVal, zone));
         assertEquals("validate(C) locale ", expectedZone, DateValidator.getInstance().validate(localeVal, locale, zone));
