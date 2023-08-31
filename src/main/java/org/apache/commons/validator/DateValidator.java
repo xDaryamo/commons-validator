@@ -84,11 +84,7 @@ public class DateValidator {
             return false;
         }
 
-        if (strict && (datePattern.length() != value.length())) {
-            return false;
-        }
-
-        return true;
+        return !strict || (datePattern.length() == value.length());
     }
 
     /**
