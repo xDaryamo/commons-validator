@@ -636,7 +636,8 @@ public class ValidatorAction implements Serializable {
 
         final Class<?>[] parameters = new Class[this.methodParameterList.size()];
 
-        for (int i = 0; i < this.methodParameterList.size(); i++) {
+        int size = this.methodParameterList.size();
+        for (int i = 0; i < size; ++i) {
             final String paramClassName = this.methodParameterList.get(i);
 
             try {
@@ -662,7 +663,8 @@ public class ValidatorAction implements Serializable {
 
         final Object[] paramValue = new Object[this.methodParameterList.size()];
 
-        for (int i = 0; i < this.methodParameterList.size(); i++) {
+        int size = this.methodParameterList.size();
+        for (int i = 0; i < size; ++i) {
             final String paramClassName = this.methodParameterList.get(i);
             paramValue[i] = params.get(paramClassName);
         }
@@ -708,7 +710,7 @@ public class ValidatorAction implements Serializable {
         final int beanIndex = this.methodParameterList.indexOf(Validator.BEAN_PARAM);
         final int fieldIndex = this.methodParameterList.indexOf(Validator.FIELD_PARAM);
 
-        final Object indexedList[] = field.getIndexedProperty(paramValues[beanIndex]);
+        final Object[] indexedList = field.getIndexedProperty(paramValues[beanIndex]);
 
         // Set current iteration object to the parameter array
         paramValues[beanIndex] = indexedList[pos];
