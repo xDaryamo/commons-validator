@@ -192,7 +192,7 @@ public class Form implements Serializable {
                     if (getFieldMap().get(f.getKey()) == null) {
                         lFields.add(n, f);
                         getFieldMap().put(f.getKey(), f);
-                        n++;
+                        ++n;
                     }
                 }
             }
