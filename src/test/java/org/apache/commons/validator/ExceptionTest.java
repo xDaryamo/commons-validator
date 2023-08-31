@@ -70,7 +70,7 @@ public class ExceptionTest extends AbstractCommonTest {
             validator.validate();
             fail("ValidatorException should occur here!");
         } catch (final ValidatorException expected) {
-            assertTrue("VALIDATOR-EXCEPTION".equals(expected.getMessage()));
+            assertEquals("VALIDATOR-EXCEPTION", expected.getMessage());
         }
     }
 
@@ -134,7 +134,7 @@ public class ExceptionTest extends AbstractCommonTest {
         } catch (final ValidatorException expected) {
             fail("Checked exceptions are not wrapped in ValidatorException in Validator 1.x.");
         } catch (final Exception e) {
-            assertTrue("CHECKED-EXCEPTION".equals(e.getMessage()));
+            assertEquals("CHECKED-EXCEPTION", e.getMessage());
         }
 
         // This will be true in Validator 2.0

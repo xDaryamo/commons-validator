@@ -52,19 +52,19 @@ public class FlagsTest extends TestCase {
         f.turnOn(LONG_FLAG);
         f.turnOn(INT_FLAG);
         assertTrue(f.isOn(LONG_FLAG));
-        assertTrue(!f.isOff(LONG_FLAG));
+        assertFalse(f.isOff(LONG_FLAG));
 
         assertTrue(f.isOn(INT_FLAG));
-        assertTrue(!f.isOff(INT_FLAG));
+        assertFalse(f.isOff(INT_FLAG));
 
         assertTrue(f.isOff(LONG_FLAG_2));
     }
 
-    public void testTurnOnOff() {
+    /*public void testTurnOnOff() {
     }
 
     public void testTurnOff() {
-    }
+    }*/
 
     public void testTurnOffAll() {
         final Flags f = new Flags(98432);
@@ -99,15 +99,29 @@ public class FlagsTest extends TestCase {
     }
 
     /**
-     * Test for Object clone()
+     * Test for Copy Constructor
      */
-    public void testClone() {
+    public void testCopyConstructor() {
+
+        final Flags original = new Flags(1234);
+
+        final Flags copy = new Flags(original);
+
+        assertNotNull(copy);
+        assertEquals(original.getClass(), copy.getClass());
+
     }
 
     /**
      * Test for boolean equals(Object)
      */
     public void testEqualsObject() {
+
+        final Flags original = new Flags(1234);
+
+        final Flags copy = new Flags(original);
+
+        assertEquals(original.getFlags(), copy.getFlags());
     }
 
     /**

@@ -23,7 +23,7 @@ import java.io.Serializable;
  * passing in information to a pluggable validator.  Instances of this class are
  * configured with a &lt;var&gt; xml element.
  */
-public class Var implements Cloneable, Serializable {
+public class Var implements Serializable {
 
     private static final long serialVersionUID = -684185211548420224L;
 
@@ -174,17 +174,16 @@ public class Var implements Cloneable, Serializable {
     }
 
     /**
-     * Creates and returns a copy of this object.
-     * @return A copy of the variable.
+     * Copy constructor for the Var class. Creates a new Var object by copying the values from another Var object.
+     *
+     * @param other The Var object to copy.
      */
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-
-        } catch(final CloneNotSupportedException e) {
-            throw new RuntimeException(e.toString());
-        }
+    public Var(Var other) {
+       this.bundle = other.bundle;
+       this.name = other.name;
+       this.jsType = other.jsType;
+       this.value = other.value;
+       this.resource = other.resource;
     }
 
     /**

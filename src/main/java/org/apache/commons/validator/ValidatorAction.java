@@ -502,6 +502,22 @@ public class ValidatorAction implements Serializable {
         return results.toString();
     }
 
+    private Object invokeValidationMethod(Method validationMethod, Object validationClassInstance, Object[] paramValues) throws ValidatorException {
+        try {
+            return validationMethod.invoke(validationClassInstance, paramValues);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw new ValidatorException(e.getMessage());
+        } catch (final InvocationTargetException e) {
+            if (e.getTargetException() instanceof Exception) {
+                throw (ValidatorException) e.getTargetException();
+            }
+            if (e.getTargetException() instanceof Error) {
+                throw (Error) e.getTargetException();
+            }
+            throw new ValidatorException(e.getMessage()); // Add this return statement
+        }
+    }
+
     /**
      * Dynamically runs the validation method for this validator and returns
      * true if the data is valid.
@@ -512,13 +528,11 @@ public class ValidatorAction implements Serializable {
      * @throws ValidatorException
      */
     boolean executeValidationMethod(
-        final Field field,
-        // TODO What is this the correct value type?
-        // both ValidatorAction and Validator are added as parameters
-        final Map<String, Object> params,
-        final ValidatorResults results,
-        final int pos)
-        throws ValidatorException {
+            final Field field,
+            final Map<String, Object> params,
+            final ValidatorResults results,
+            final int pos)
+            throws ValidatorException {
 
         params.put(Validator.VALIDATOR_ACTION_PARAM, this);
 
@@ -538,28 +552,10 @@ public class ValidatorAction implements Serializable {
                 this.handleIndexedField(field, pos, paramValues);
             }
 
-            Object result = null;
-            try {
-                result =
-                    validationMethod.invoke(
-                        getValidationClassInstance(),
-                        paramValues);
-
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new ValidatorException(e.getMessage());
-            } catch (final InvocationTargetException e) {
-
-                if (e.getTargetException() instanceof Exception) {
-                    throw (Exception) e.getTargetException();
-
-                }
-                if (e.getTargetException() instanceof Error) {
-                    throw (Error) e.getTargetException();
-                }
-            }
+            Object result = invokeValidationMethod(validationMethod, getValidationClassInstance(), paramValues);
 
             final boolean valid = this.isValid(result);
-            if (!valid || (valid && !onlyReturnErrors(params))) {
+            if (!valid || !onlyReturnErrors(params)) {
                 results.add(field, this.name, valid, result);
             }
 
@@ -567,7 +563,7 @@ public class ValidatorAction implements Serializable {
                 return false;
             }
 
-            // TODO This catch block remains for backward compatibility.  Remove
+            // TODO This catch block remains for backward compatibility. Remove
             // this for Validator 2.0 when exception scheme changes.
         } catch (final Exception e) {
             if (e instanceof ValidatorException) {
@@ -575,8 +571,8 @@ public class ValidatorAction implements Serializable {
             }
 
             getLog().error(
-                "Unhandled exception thrown during validation: " + e.getMessage(),
-                e);
+                    "Unhandled exception thrown during validation: " + e.getMessage(),
+                    e);
 
             results.add(field, this.name, false);
             return false;
@@ -584,6 +580,7 @@ public class ValidatorAction implements Serializable {
 
         return true;
     }
+
 
     /**
      * Load the Method object for the configured validation method name.
@@ -637,20 +634,21 @@ public class ValidatorAction implements Serializable {
             return;
         }
 
-        final Class<?>[] parameterClasses = new Class[this.methodParameterList.size()];
+        final Class<?>[] parameters = new Class[this.methodParameterList.size()];
 
-        for (int i = 0; i < this.methodParameterList.size(); i++) {
+        int size = this.methodParameterList.size();
+        for (int i = 0; i < size; ++i) {
             final String paramClassName = this.methodParameterList.get(i);
 
             try {
-                parameterClasses[i] = loader.loadClass(paramClassName);
+                parameters[i] = loader.loadClass(paramClassName);
 
             } catch (final ClassNotFoundException e) {
                 throw new ValidatorException(e.getMessage());
             }
         }
 
-        this.parameterClasses = parameterClasses;
+        this.parameterClasses = parameters;
     }
 
     /**
@@ -665,7 +663,8 @@ public class ValidatorAction implements Serializable {
 
         final Object[] paramValue = new Object[this.methodParameterList.size()];
 
-        for (int i = 0; i < this.methodParameterList.size(); i++) {
+        int size = this.methodParameterList.size();
+        for (int i = 0; i < size; ++i) {
             final String paramClassName = this.methodParameterList.get(i);
             paramValue[i] = params.get(paramClassName);
         }
@@ -711,14 +710,14 @@ public class ValidatorAction implements Serializable {
         final int beanIndex = this.methodParameterList.indexOf(Validator.BEAN_PARAM);
         final int fieldIndex = this.methodParameterList.indexOf(Validator.FIELD_PARAM);
 
-        final Object indexedList[] = field.getIndexedProperty(paramValues[beanIndex]);
+        final Object[] indexedList = field.getIndexedProperty(paramValues[beanIndex]);
 
         // Set current iteration object to the parameter array
         paramValues[beanIndex] = indexedList[pos];
 
         // Set field clone with the key modified to represent
         // the current field
-        final Field indexedField = (Field) field.clone();
+        final Field indexedField = new Field(field);
         indexedField.setKey(
             ValidatorUtils.replace(
                 indexedField.getKey(),

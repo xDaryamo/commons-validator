@@ -36,14 +36,14 @@ import java.io.Serializable;
  * and Flag 2 both being on/true.
  * </p>
  */
-public class Flags implements Serializable, Cloneable {
+public class Flags implements Serializable {
 
     private static final long serialVersionUID = 8481587558770237995L;
 
     /**
      * Represents the current flag state.
      */
-    private long flags;
+    private long flagsContent;
 
     /**
      * Create a new Flags object.
@@ -57,7 +57,7 @@ public class Flags implements Serializable, Cloneable {
      * @param flags collection of boolean flags to represent.
      */
     public Flags(final long flags) {
-        this.flags = flags;
+        this.flagsContent = flags;
     }
 
     /**
@@ -66,7 +66,7 @@ public class Flags implements Serializable, Cloneable {
      * @return collection of boolean flags represented.
      */
     public long getFlags() {
-        return this.flags;
+        return this.flagsContent;
     }
 
     /**
@@ -78,7 +78,7 @@ public class Flags implements Serializable, Cloneable {
      * @return whether the specified flag value is on.
      */
     public boolean isOn(final long flag) {
-        return (this.flags & flag) == flag;
+        return (this.flagsContent & flag) == flag;
     }
 
     /**
@@ -90,7 +90,7 @@ public class Flags implements Serializable, Cloneable {
      * @return whether the specified flag value is off.
      */
     public boolean isOff(final long flag) {
-        return (this.flags & flag) == 0;
+        return (this.flagsContent & flag) == 0;
     }
 
     /**
@@ -100,7 +100,7 @@ public class Flags implements Serializable, Cloneable {
      * @param flag Flag value to turn on.
      */
     public void turnOn(final long flag) {
-        this.flags |= flag;
+        this.flagsContent |= flag;
     }
 
     /**
@@ -110,14 +110,14 @@ public class Flags implements Serializable, Cloneable {
      * @param flag Flag value to turn off.
      */
     public void turnOff(final long flag) {
-        this.flags &= ~flag;
+        this.flagsContent &= ~flag;
     }
 
     /**
      * Turn off all flags.
      */
     public void turnOffAll() {
-        this.flags = 0;
+        this.flagsContent = 0;
     }
 
     /**
@@ -125,29 +125,23 @@ public class Flags implements Serializable, Cloneable {
      * @since 1.1.1
      */
     public void clear() {
-        this.flags = 0;
+        this.flagsContent = 0;
     }
 
     /**
      * Turn on all 64 flags.
      */
     public void turnOnAll() {
-        this.flags = 0xFFFFFFFFFFFFFFFFL;
+        this.flagsContent = 0xFFFFFFFFFFFFFFFFL;
     }
 
     /**
-     * Clone this Flags object.
+     * Copy constructor for the Flags class. Creates a new Flags object by copying the values from another Flags object.
      *
-     * @return a copy of this object.
-     * @see Object#clone()
+     * @param other The Arg object to copy.
      */
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch(final CloneNotSupportedException e) {
-            throw new RuntimeException("Couldn't clone Flags object.");
-        }
+    public Flags(Flags other) {
+        this.flagsContent = other.flagsContent;
     }
 
     /**
@@ -169,7 +163,7 @@ public class Flags implements Serializable, Cloneable {
 
         final Flags f = (Flags) obj;
 
-        return this.flags == f.flags;
+        return this.flagsContent == f.flagsContent;
     }
 
     /**
@@ -180,7 +174,7 @@ public class Flags implements Serializable, Cloneable {
      */
     @Override
     public int hashCode() {
-        return (int) this.flags;
+        return (int) this.flagsContent;
     }
 
     /**
@@ -192,7 +186,7 @@ public class Flags implements Serializable, Cloneable {
      */
     @Override
     public String toString() {
-        final StringBuilder bin = new StringBuilder(Long.toBinaryString(this.flags));
+        final StringBuilder bin = new StringBuilder(Long.toBinaryString(this.flagsContent));
         for (int i = 64 - bin.length(); i > 0; i--) { // CHECKSTYLE IGNORE MagicNumber
             bin.insert(0, "0");
         }

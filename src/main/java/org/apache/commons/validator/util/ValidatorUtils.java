@@ -38,6 +38,13 @@ import org.apache.commons.validator.Var;
  */
 public class ValidatorUtils {
 
+    /**
+     * This is an empty constructor
+     */
+    private ValidatorUtils() {
+        //empty constructor
+    }
+
     private static final Log LOG = LogFactory.getLog(ValidatorUtils.class);
 
     /**
@@ -139,11 +146,11 @@ public class ValidatorUtils {
         final HashMap<String, ?> map = fastHashMap;
         map.forEach((key, value) -> {
             if (value instanceof Msg) {
-                results.put(key, ((Msg) value).clone());
+                results.put(key, new Msg((Msg) value));
             } else if (value instanceof Arg) {
-                results.put(key, ((Arg) value).clone());
+                results.put(key, new Arg((Arg) value));
             } else if (value instanceof Var) {
-                results.put(key, ((Var) value).clone());
+                results.put(key, new Var( (Var) value));
             } else {
                 results.put(key, value);
             }
@@ -165,11 +172,11 @@ public class ValidatorUtils {
         final Map<String, Object> results = new HashMap<>();
         map.forEach((key, value) -> {
             if (value instanceof Msg) {
-                results.put(key, ((Msg) value).clone());
+                results.put(key, new Msg((Msg) value));
             } else if (value instanceof Arg) {
-                results.put(key, ((Arg) value).clone());
+                results.put(key, new Arg((Arg) value));
             } else if (value instanceof Var) {
-                results.put(key, ((Var) value).clone());
+                results.put(key, new Var((Var) value));
             } else {
                 results.put(key, value);
             }

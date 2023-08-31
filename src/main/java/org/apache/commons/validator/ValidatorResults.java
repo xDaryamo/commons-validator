@@ -132,8 +132,9 @@ public class ValidatorResults implements Serializable {
 
         for (final String propertyKey : hResults.keySet()) {
             final ValidatorResult vr = this.getValidatorResult(propertyKey);
+            Iterator<String> x = vr.getActions();
 
-            for (final Iterator<String> x = vr.getActions(); x.hasNext();) {
+            while (x.hasNext()) {
                 final String actionKey = x.next();
                 final Object result = vr.getResult(actionKey);
 
@@ -145,5 +146,6 @@ public class ValidatorResults implements Serializable {
 
         return results;
     }
+
 
 }

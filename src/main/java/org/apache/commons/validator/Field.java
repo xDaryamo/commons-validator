@@ -44,7 +44,7 @@ import org.apache.commons.validator.util.ValidatorUtils;
  * @see org.apache.commons.validator.Form
  */
 // TODO mutable non-private fields
-public class Field implements Cloneable, Serializable {
+public class Field implements Serializable {
 
     private static final long serialVersionUID = -8502647722530192185L;
 
@@ -145,6 +145,36 @@ public class Field implements Cloneable, Serializable {
      */
     @SuppressWarnings("unchecked") // cannot instantiate generic array, so have to assume this is OK
     protected Map<String, Arg>[] args = new Map[0];
+
+
+    public Field() {}
+
+    /**
+     * Copy constructor for the Field class. Creates a new Field object by copying the values from another Field object.
+     *
+     * @param other The Field object to copy.
+     */
+    public Field(Field other) {
+        this.property = other.property;
+        this.indexedProperty = other.indexedProperty;
+        this.indexedListProperty = other.indexedListProperty;
+        this.key = other.key;
+        this.depends = other.depends;
+        this.page = other.page;
+        this.clientValidation = other.clientValidation;
+        this.fieldOrder = other.fieldOrder;
+
+        // Cloning the arguments
+        this.args = new Map[other.args.length];
+        for (int i = 0; i < other.args.length; i++) {
+            if (other.args[i] != null) {
+                this.args[i] = new HashMap<>(other.args[i]);
+            }
+        }
+
+    }
+
+
 
     /**
      * Gets the page value that the Field is associated with for
@@ -593,8 +623,8 @@ public class Field implements Cloneable, Serializable {
         // Process Var Constant Replacement
         for (final String key1 : getVarMap().keySet()) {
             final String key2 = TOKEN_START + TOKEN_VAR + key1 + TOKEN_END;
-            final Var var = this.getVar(key1);
-            final String replaceValue = var.getValue();
+            final Var replacement = this.getVar(key1);
+            final String replaceValue = replacement.getValue();
 
             this.processMessageComponents(key2, replaceValue);
         }
@@ -607,8 +637,8 @@ public class Field implements Cloneable, Serializable {
      */
     private void processVars(final String key, final String replaceValue) {
         for (final String varKey : getVarMap().keySet()) {
-            final Var var = this.getVar(varKey);
-            var.setValue(ValidatorUtils.replace(var.getValue(), key, replaceValue));
+            final Var replacement = this.getVar(varKey);
+            replacement.setValue(ValidatorUtils.replace(replacement.getValue(), key, replaceValue));
         }
 
     }
@@ -663,37 +693,6 @@ public class Field implements Cloneable, Serializable {
         return Collections.unmodifiableList(this.dependencyList);
     }
 
-    /**
-     * Creates and returns a copy of this object.
-     * @return A copy of the Field.
-     */
-    @Override
-    public Object clone() {
-        Field field = null;
-        try {
-            field = (Field) super.clone();
-        } catch(final CloneNotSupportedException e) {
-            throw new RuntimeException(e.toString());
-        }
-
-        @SuppressWarnings("unchecked") // empty array always OK; cannot check this at compile time
-        final Map<String, Arg>[] tempMap = new Map[this.args.length];
-        field.args = tempMap;
-        for (int i = 0; i < this.args.length; i++) {
-            if (this.args[i] == null) {
-                continue;
-            }
-
-            final Map<String, Arg> argMap = new HashMap<>(this.args[i]);
-            argMap.forEach((validatorName, arg) -> argMap.put(validatorName, (Arg) arg.clone()));
-            field.args[i] = argMap;
-        }
-
-        field.hVars = ValidatorUtils.copyFastHashMap(hVars);
-        field.hMsgs = ValidatorUtils.copyFastHashMap(hMsgs);
-
-        return field;
-    }
 
     /**
      * Returns a string representation of the object.

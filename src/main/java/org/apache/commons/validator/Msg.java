@@ -25,7 +25,7 @@ import java.io.Serializable;
  * Instances of this class are configured with a &lt;msg&gt; xml element.
  */
 //TODO mutable non-private fields
-public class Msg implements Cloneable, Serializable {
+public class Msg implements Serializable {
 
     private static final long serialVersionUID = 5690015734364127124L;
 
@@ -123,17 +123,15 @@ public class Msg implements Cloneable, Serializable {
     }
 
     /**
-     * Creates and returns a copy of this object.
-     * @return A copy of the Msg.
+     * Copy constructor for the Msg class. Creates a new Msg object by copying the values from another Msg object.
+     *
+     * @param other The Msg object to copy.
      */
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-
-        } catch(final CloneNotSupportedException e) {
-            throw new RuntimeException(e.toString());
-        }
+    public Msg(Msg other) {
+        this.bundle = other.bundle;
+        this.name = other.name;
+        this.key = other.key;
+        this.resource = other.resource;
     }
 
     /**

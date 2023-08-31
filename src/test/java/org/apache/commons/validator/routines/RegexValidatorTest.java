@@ -99,6 +99,7 @@ public class RegexValidatorTest extends TestCase {
         final String invalidRegex = "^([abCD12]*$";
         try {
             new RegexValidator(invalidRegex);
+            fail("Expected PatternSyntaxException to be thrown, but it wasn't.");
         } catch (final PatternSyntaxException e) {
             // expected
         }
