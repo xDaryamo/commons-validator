@@ -277,13 +277,15 @@ public class UrlValidator implements Serializable {
                 schemes = DEFAULT_SCHEMES;
             }
             allowedSchemes = new HashSet<>(schemes.length);
-            for (final String scheme : schemes) {
+            for (int i = 0; i < schemes.length; ++i) {
+                final String scheme = schemes[i];
                 allowedSchemes.add(scheme.toLowerCase(Locale.ENGLISH));
             }
         }
 
         this.authorityValidator = authorityValidator;
     }
+
 
     /**
      * <p>Checks if a field has a valid URL address.</p>
@@ -333,11 +335,7 @@ public class UrlValidator implements Serializable {
             return false;
         }
 
-        if (!isValidFragment(uri.getRawFragment())) {
-            return false;
-        }
-
-        return true;
+        return isValidFragment(uri.getRawFragment());
     }
 
     /**
@@ -358,11 +356,7 @@ public class UrlValidator implements Serializable {
             return false;
         }
 
-        if (isOff(ALLOW_ALL_SCHEMES) && !allowedSchemes.contains(scheme.toLowerCase(Locale.ENGLISH))) {
-            return false;
-        }
-
-        return true;
+        return !isOff(ALLOW_ALL_SCHEMES) || allowedSchemes.contains(scheme.toLowerCase(Locale.ENGLISH));
     }
 
     /**
@@ -471,11 +465,7 @@ public class UrlValidator implements Serializable {
         }
 
         final int slash2Count = countToken("//", path);
-        if (isOff(ALLOW_2_SLASHES) && (slash2Count > 0)) {
-            return false;
-        }
-
-        return true;
+        return !isOff(ALLOW_2_SLASHES) || (slash2Count <= 0);
     }
 
     /**
@@ -516,8 +506,8 @@ public class UrlValidator implements Serializable {
         while (tokenIndex != -1) {
             tokenIndex = target.indexOf(token, tokenIndex);
             if (tokenIndex > -1) {
-                tokenIndex++;
-                count++;
+                ++tokenIndex;
+                ++count;
             }
         }
         return count;
