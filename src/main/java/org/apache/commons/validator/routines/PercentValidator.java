@@ -107,7 +107,8 @@ public class PercentValidator extends BigDecimalValidator {
         final String pattern = decimalFormat.toPattern();
         if (pattern.indexOf(PERCENT_SYMBOL) >= 0) {
             final StringBuilder buffer = new StringBuilder(pattern.length());
-            for (int i = 0; i < pattern.length(); i++) {
+            int size = pattern.length();
+            for (int i = 0; i < size; ++i) {
                 if (pattern.charAt(i) != PERCENT_SYMBOL) {
                     buffer.append(pattern.charAt(i));
                 }
