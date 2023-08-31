@@ -106,12 +106,13 @@ public class IBANValidator {
             this.otherCountryCodes = otherCountryCodes.clone();
             List<String> regexList = new ArrayList<>(this.otherCountryCodes.length + 1);
             regexList.add(countryCode + regexWithoutCC);
-            for (String otherCc : otherCountryCodes) {
-                regexList.add(otherCc + regexWithoutCC);
+            for (int i = 0; i < otherCountryCodes.length; ++i) {
+                regexList.add(otherCountryCodes[i] + regexWithoutCC);
             }
             this.ibanLength = ibanLength;
             this.regexValidator = new RegexValidator(regexList);
         }
+
 
         /**
          * Gets the RegexValidator.
