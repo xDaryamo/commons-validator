@@ -75,11 +75,16 @@ public final class ISINCheckDigit extends ModulusCheckDigit {
                 throw new CheckDigitException("Invalid checkdigit["+ checkDigit+ "] in " + code);
             }
         }
-        for (int i = 0; i < code.length(); i++) {
+
+        int size = code.length();
+        for (int i = 0; i < size; ++i) {
             final int charValue = Character.getNumericValue(code.charAt(i));
             if (charValue < 0 || charValue > MAX_ALPHANUMERIC_VALUE) {
-                throw new CheckDigitException("Invalid Character[" +
-                        (i + 1) + "] = '" + charValue + "'");
+
+                StringBuilder msg = new StringBuilder("Invalid Character[").append((i + 1))
+                        .append("] = '").append(charValue).append("'");
+
+                throw new CheckDigitException(msg.toString());
             }
              // this converts alphanumerics to two digits
              // so there is no need to overload toInt()
