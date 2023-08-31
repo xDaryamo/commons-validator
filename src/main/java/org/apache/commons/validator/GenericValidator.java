@@ -329,12 +329,20 @@ public class GenericValidator implements Serializable {
     private static int adjustForLineEnding(final String value, final int lineEndLength) {
         int nCount = 0;
         int rCount = 0;
-        for (int i = 0; i < value.length(); i++) {
-            if (value.charAt(i) == '\n') {
-                nCount++;
-            }
-            if (value.charAt(i) == '\r') {
-                rCount++;
+        int length = value.length();
+        for (int i = 0; i < length; ++i) {
+            char character = value.charAt(i);
+
+            switch (character) {
+                case '\n':
+                    ++nCount;
+                    break;
+                case '\r':
+                    ++rCount;
+                    break;
+                default:
+                    break;
+                // Add more cases for other characters if needed
             }
         }
         return ((nCount * lineEndLength) - (rCount + nCount));

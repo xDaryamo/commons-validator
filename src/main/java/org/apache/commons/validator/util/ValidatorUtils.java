@@ -106,8 +106,7 @@ public class ValidatorUtils {
 
         try {
             value = PropertyUtils.getProperty(bean, property);
-
-        } catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             LOG.error(e.getMessage(), e);
         }
 
@@ -115,17 +114,28 @@ public class ValidatorUtils {
             return null;
         }
 
-        if (value instanceof String[]) {
-            return ((String[]) value).length > 0 ? value.toString() : "";
+        String result = "";
 
+        switch (value.getClass().getSimpleName()) {
+            case "String[]":
+                result = ((String[]) value).length > 0 ? value.toString() : "";
+                break;
+            case "ArrayList":
+            case "LinkedList":
+            case "HashSet":
+            case "TreeSet":
+                if (!((Collection<?>) value).isEmpty()) {
+                    result = value.toString();
+                }
+                break;
+            default:
+                result = value.toString();
+                break;
         }
-        if (value instanceof Collection) {
-            return ((Collection<?>) value).isEmpty() ? "" : value.toString();
 
-        }
-        return value.toString();
-
+        return result;
     }
+
 
     /**
      * Makes a deep copy of a <code>FastHashMap</code> if the values
@@ -144,20 +154,28 @@ public class ValidatorUtils {
         final FastHashMap results = new FastHashMap();
         @SuppressWarnings("unchecked") // FastHashMap is not generic
         final HashMap<String, ?> map = fastHashMap;
+
         map.forEach((key, value) -> {
-            if (value instanceof Msg) {
-                results.put(key, new Msg((Msg) value));
-            } else if (value instanceof Arg) {
-                results.put(key, new Arg((Arg) value));
-            } else if (value instanceof Var) {
-                results.put(key, new Var( (Var) value));
-            } else {
-                results.put(key, value);
+            switch (value.getClass().getSimpleName()) {
+                case "Msg":
+                    results.put(key, new Msg((Msg) value));
+                    break;
+                case "Arg":
+                    results.put(key, new Arg((Arg) value));
+                    break;
+                case "Var":
+                    results.put(key, new Var((Var) value));
+                    break;
+                default:
+                    results.put(key, value);
+                    break;
             }
         });
+
         results.setFast(true);
         return results;
     }
+
 
     /**
      * Makes a deep copy of a <code>Map</code> if the values are
@@ -170,18 +188,26 @@ public class ValidatorUtils {
      */
     public static Map<String, Object> copyMap(final Map<String, Object> map) {
         final Map<String, Object> results = new HashMap<>();
+
         map.forEach((key, value) -> {
-            if (value instanceof Msg) {
-                results.put(key, new Msg((Msg) value));
-            } else if (value instanceof Arg) {
-                results.put(key, new Arg((Arg) value));
-            } else if (value instanceof Var) {
-                results.put(key, new Var((Var) value));
-            } else {
-                results.put(key, value);
+            switch (value.getClass().getSimpleName()) {
+                case "Msg":
+                    results.put(key, new Msg((Msg) value));
+                    break;
+                case "Arg":
+                    results.put(key, new Arg((Arg) value));
+                    break;
+                case "Var":
+                    results.put(key, new Var((Var) value));
+                    break;
+                default:
+                    results.put(key, value);
+                    break;
             }
         });
+
         return results;
     }
+
 
 }

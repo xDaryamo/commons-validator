@@ -187,7 +187,8 @@ public class Flags implements Serializable {
     @Override
     public String toString() {
         final StringBuilder bin = new StringBuilder(Long.toBinaryString(this.flagsContent));
-        for (int i = 64 - bin.length(); i > 0; i--) { // CHECKSTYLE IGNORE MagicNumber
+        int length = bin.length();
+        for (int i = 64 - length; i > 0; i--) { // CHECKSTYLE IGNORE MagicNumber
             bin.insert(0, "0");
         }
         return bin.toString();

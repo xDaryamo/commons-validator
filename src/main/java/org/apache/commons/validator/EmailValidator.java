@@ -130,7 +130,7 @@ public class EmailValidator {
      */
     protected boolean isValidIpAddress(final String ipAddress) {
         final Matcher ipAddressMatcher = IP_DOMAIN_PATTERN.matcher(ipAddress);
-        for (int i = 1; i <= 4; i++) { // CHECKSTYLE IGNORE MagicNumber
+        for (int i = 1; i <= 4; ++i) { // CHECKSTYLE IGNORE MagicNumber
             final String ipSegment = ipAddressMatcher.group(i);
             if (ipSegment == null || ipSegment.isEmpty()) {
                 return false;
@@ -172,7 +172,7 @@ public class EmailValidator {
                         ? ""
                         : domain.substring(l);
 
-                i++;
+                ++i;
             }
         }
 
@@ -197,14 +197,14 @@ public class EmailValidator {
      * @param emailStr The email address
      * @return address with comments removed.
     */
-    protected String stripComments(final String emailStr)  {
-     String result = emailStr;
-     final String commentPat = "^((?:[^\"\\\\]|\\\\.)*+)\"((?:[^\"\\\\]|\\\\.)*+)\"\\((?:[^()\\\\]|\\\\.)*+\\)/\n/";
-     final Pattern commentMatcher = Pattern.compile(commentPat);
+    protected String stripComments(final String emailStr) {
+        String result = emailStr;
+        final String commentPat = "^((?:[^\"\\\\]|\\\\.)*+)\"((?:[^\"\\\\]|\\\\.)*+)\"\\((?:[^()\\\\]|\\\\.)*+\\)/\n/";
 
-     while (commentMatcher.matcher(result).matches()) {
-        result = result.replaceFirst(commentPat, "\1 ");
-     }
-     return result;
+        while (result.matches(commentPat)) {
+            result = result.replaceFirst(commentPat, "$1 ");
+        }
+        return result;
     }
+
 }

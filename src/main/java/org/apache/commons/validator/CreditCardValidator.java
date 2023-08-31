@@ -172,7 +172,7 @@ public class CreditCardValidator {
         final int digits = cardNumber.length();
         final int oddOrEven = digits & 1;
         long sum = 0;
-        for (int count = 0; count < digits; count++) {
+        for (int count = 0; count < digits; ++count) {
             int digit = 0;
             try {
                 digit = Integer.parseInt(cardNumber.charAt(count) + "");
@@ -189,7 +189,7 @@ public class CreditCardValidator {
             sum += digit;
         }
 
-        return (sum == 0) ? false : (sum % 10 == 0);
+        return sum != 0 && (sum % 10 == 0);
     }
 
     /**
