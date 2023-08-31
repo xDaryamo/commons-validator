@@ -342,7 +342,7 @@ public class UrlValidator implements Serializable {
             }
 
             final String topLevel = domainSegmentList.get(segmentCount - 1);
-            if (topLevel.length() < 2 || topLevel.length() > 4) {
+            if (topLevel.length() < 2 || topLevel.length() > 4) { // CHECKSTYLE IGNORE MagicNumber
                 return false;  // Top-level domain length check
             }
 
