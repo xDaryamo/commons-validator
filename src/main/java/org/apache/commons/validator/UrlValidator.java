@@ -17,6 +17,7 @@
 package org.apache.commons.validator;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -267,11 +268,7 @@ public class UrlValidator implements Serializable {
             return false;
         }
 
-        if (!isValidFragment(urlMatcher.group(PARSE_URL_FRAGMENT))) {
-            return false;
-        }
-
-        return true;
+        return isValidFragment(urlMatcher.group(PARSE_URL_FRAGMENT));
     }
 
     /**
@@ -291,11 +288,7 @@ public class UrlValidator implements Serializable {
             return false;
         }
 
-        if (options.isOff(ALLOW_ALL_SCHEMES) && !allowedSchemes.contains(scheme)) {
-            return false;
-        }
-
-        return true;
+        return !options.isOff(ALLOW_ALL_SCHEMES) || allowedSchemes.contains(scheme);
     }
 
     /**
@@ -329,49 +322,41 @@ public class UrlValidator implements Serializable {
 
         //rightmost hostname will never start with a digit.
         if (hostname) {
-            // LOW-TECH FIX FOR VALIDATOR-202
-            // TODO: Rewrite to use ArrayList and .add semantics: see VALIDATOR-203
-            final char[] chars = hostIP.toCharArray();
-            int size = 1;
-            for (final char element : chars) {
-                if(element == '.') {
-                    size++;
-                }
-            }
-            final String[] domainSegment = new String[size];
+            ArrayList<String> domainSegmentList = new ArrayList<>();
             boolean match = true;
-            int segmentCount = 0;
             int segmentLength = 0;
 
             while (match) {
                 final Matcher atomMatcher = ATOM_PATTERN.matcher(hostIP);
                 match = atomMatcher.matches();
                 if (match) {
-                    domainSegment[segmentCount] = atomMatcher.group(1);
-                    segmentLength = domainSegment[segmentCount].length() + 1;
-                    hostIP =
-                            (segmentLength >= hostIP.length())
-                            ? ""
-                            : hostIP.substring(segmentLength);
-
-                    segmentCount++;
+                    domainSegmentList.add(atomMatcher.group(1));
+                    segmentLength = atomMatcher.group(1).length() + 1;
+                    hostIP = (segmentLength >= hostIP.length()) ? "" : hostIP.substring(segmentLength);
                 }
             }
-            final String topLevel = domainSegment[segmentCount - 1];
-            if (topLevel.length() < 2 || topLevel.length() > 4) { // CHECKSTYLE IGNORE MagicNumber (deprecated code)
-                return false;
+
+            int segmentCount = domainSegmentList.size();
+            if (segmentCount == 0) {
+                return false;  // No domain segments found
             }
 
-            // First letter of top level must be a alpha
+            final String topLevel = domainSegmentList.get(segmentCount - 1);
+            if (topLevel.length() < 2 || topLevel.length() > 4) {
+                return false;  // Top-level domain length check
+            }
+
+            // First letter of top level must be an alpha
             if (!ALPHA_PATTERN.matcher(topLevel.substring(0, 1)).matches()) {
                 return false;
             }
 
-            // Make sure there's a host name preceding the authority.
+            // Make sure there's at least one domain segment preceding the authority.
             if (segmentCount < 2) {
                 return false;
             }
         }
+
 
         if (!hostname && !ipV4Address) {
             return false;
@@ -383,11 +368,7 @@ public class UrlValidator implements Serializable {
         }
 
         final String extra = authorityMatcher.group(PARSE_AUTHORITY_EXTRA);
-        if (!GenericValidator.isBlankOrNull(extra)) {
-            return false;
-        }
-
-        return true;
+        return GenericValidator.isBlankOrNull(extra);
     }
 
     /**
@@ -411,11 +392,7 @@ public class UrlValidator implements Serializable {
 
         final int slashCount = countToken("/", path);
         final int dot2Count = countToken("..", path);
-        if (dot2Count > 0 && (slashCount - slash2Count - 1) <= dot2Count){
-            return false;
-        }
-
-        return true;
+        return dot2Count <= 0 || (slashCount - slash2Count - 1) > dot2Count;
     }
 
     /**
@@ -456,8 +433,8 @@ public class UrlValidator implements Serializable {
         while (tokenIndex != -1) {
             tokenIndex = target.indexOf(token, tokenIndex);
             if (tokenIndex > -1) {
-                tokenIndex++;
-                count++;
+                ++tokenIndex;
+                ++count;
             }
         }
         return count;
