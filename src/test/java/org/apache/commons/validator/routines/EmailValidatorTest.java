@@ -275,136 +275,64 @@ public class EmailValidatorTest {
      * that is being tested.
      */
     @Test
-    public void testEmailUserName()  {
-
-        assertTrue(validator.isValid("joe1blow@apache.org"));
-
-        assertTrue(validator.isValid("joe$blow@apache.org"));
-
-        assertTrue(validator.isValid("joe-@apache.org"));
-
-        assertTrue(validator.isValid("joe_@apache.org"));
-
-        assertTrue(validator.isValid("joe+@apache.org")); // + is valid unquoted
-
-        assertTrue(validator.isValid("joe!@apache.org")); // ! is valid unquoted
-
-        assertTrue(validator.isValid("joe*@apache.org")); // * is valid unquoted
-
-        assertTrue(validator.isValid("joe'@apache.org")); // ' is valid unquoted
-
-        assertTrue(validator.isValid("joe%45@apache.org")); // % is valid unquoted
-
-        assertTrue(validator.isValid("joe?@apache.org")); // ? is valid unquoted
-
-        assertTrue(validator.isValid("joe&@apache.org")); // & ditto
-
-        assertTrue(validator.isValid("joe=@apache.org")); // = ditto
-
-        assertTrue(validator.isValid("+joe@apache.org")); // + is valid unquoted
-
-        assertTrue(validator.isValid("!joe@apache.org")); // ! is valid unquoted
-
-        assertTrue(validator.isValid("*joe@apache.org")); // * is valid unquoted
-
-        assertTrue(validator.isValid("'joe@apache.org")); // ' is valid unquoted
-
-        assertTrue(validator.isValid("%joe45@apache.org")); // % is valid unquoted
-
-        assertTrue(validator.isValid("?joe@apache.org")); // ? is valid unquoted
-
-        assertTrue(validator.isValid("&joe@apache.org")); // & ditto
-
-        assertTrue(validator.isValid("=joe@apache.org")); // = ditto
-
-        assertTrue(validator.isValid("+@apache.org")); // + is valid unquoted
-
-        assertTrue(validator.isValid("!@apache.org")); // ! is valid unquoted
-
-        assertTrue(validator.isValid("*@apache.org")); // * is valid unquoted
-
-        assertTrue(validator.isValid("'@apache.org")); // ' is valid unquoted
-
-        assertTrue(validator.isValid("%@apache.org")); // % is valid unquoted
-
-        assertTrue(validator.isValid("?@apache.org")); // ? is valid unquoted
-
-        assertTrue(validator.isValid("&@apache.org")); // & ditto
-
-        assertTrue(validator.isValid("=@apache.org")); // = ditto
-
-
-        //UnQuoted Special characters are invalid
-
-        assertFalse(validator.isValid("joe.@apache.org")); // . not allowed at end of local part
-
-        assertFalse(validator.isValid(".joe@apache.org")); // . not allowed at start of local part
-
-        assertFalse(validator.isValid(".@apache.org")); // . not allowed alone
-
-        assertTrue(validator.isValid("joe.ok@apache.org")); // . allowed embedded
-
-        assertFalse(validator.isValid("joe..ok@apache.org")); // .. not allowed embedded
-
-        assertFalse(validator.isValid("..@apache.org")); // .. not allowed alone
-
-        assertFalse(validator.isValid("joe(@apache.org"));
-
-        assertFalse(validator.isValid("joe)@apache.org"));
-
-        assertFalse(validator.isValid("joe,@apache.org"));
-
-        assertFalse(validator.isValid("joe;@apache.org"));
-
-
-        //Quoted Special characters are valid
-        assertTrue(validator.isValid("\"joe.\"@apache.org"));
-
-        assertTrue(validator.isValid("\".joe\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe+\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe@\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe!\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe*\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe'\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe(\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe)\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe,\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe%45\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe;\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe?\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe&\"@apache.org"));
-
-        assertTrue(validator.isValid("\"joe=\"@apache.org"));
-
-        assertTrue(validator.isValid("\"..\"@apache.org"));
-
-        // escaped quote character valid in quoted string
-        assertTrue(validator.isValid("\"john\\\"doe\"@apache.org"));
-
-        assertTrue(validator.isValid("john56789.john56789.john56789.john56789.john56789.john56789.john@example.com"));
-
-        assertFalse(validator.isValid("john56789.john56789.john56789.john56789.john56789.john56789.john5@example.com"));
-
-        assertTrue(validator.isValid("\\>escape\\\\special\\^characters\\<@example.com"));
-
-        assertTrue(validator.isValid("Abc\\@def@example.com"));
-
-        assertFalse(validator.isValid("Abc@def@example.com"));
-
-        assertTrue(validator.isValid("space\\ monkey@example.com"));
+    public void testEmailUserName() {
+        String[] validUnquotedLocalParts = {
+                "joe1blow", "joe$blow", "joe-", "joe_", "joe+", "joe!", "joe*",
+                "joe'", "joe%45", "joe?", "joe&", "joe=", "+joe", "!joe", "*joe",
+                "'joe", "%joe45", "?joe", "&joe", "=joe", "+", "!", "*", "'", "%",
+                "?", "&", "="
+        };
+
+        String[] invalidUnquotedLocalParts = {
+                "joe.", ".joe", ".",
+                "joe..ok", "..",
+                "joe(", "joe)", "joe,", "joe;",
+        };
+
+        String[] validQuotedLocalParts = {
+                "\"joe.\"", "\".joe\"", "\"joe+\"", "\"joe@\"", "\"joe!\"",
+                "\"joe*\"", "\"joe'\"", "\"joe(\"", "\"joe)\"", "\"joe,\"",
+                "\"joe%45\"", "\"joe;\"", "\"joe?\"", "\"joe&\"", "\"joe=\"",
+                "\"..\"", "\"john\\\"doe\""
+        };
+
+        String[] validEmails = {
+                "joe.ok@apache.org", "\"..\"@apache.org",
+                "\"john\\\"doe\"@apache.org",
+                "john56789.john56789.john56789.john56789.john56789.john56789.john@example.com",
+                "\\>escape\\\\special\\^characters\\<@example.com",
+                "Abc\\@def@example.com", "space\\ monkey@example.com"
+        };
+
+        String[] invalidEmails = {
+                "joe.@apache.org", ".joe@apache.org", ".@apache.org",
+                "joe..ok@apache.org", "..@apache.org",
+                "joe(@apache.org", "joe)@apache.org", "joe,@apache.org", "joe;@apache.org",
+                "john56789.john56789.john56789.john56789.john56789.john56789.john5@example.com",
+                "Abc@def@example.com"
+        };
+
+        for (String localPart : validUnquotedLocalParts) {
+            assertTrue(validator.isValid(localPart + "@apache.org"));
+        }
+
+        for (String localPart : invalidUnquotedLocalParts) {
+            assertFalse(validator.isValid(localPart + "@apache.org"));
+        }
+
+        for (String localPart : validQuotedLocalParts) {
+            assertTrue(validator.isValid(localPart + "@apache.org"));
+        }
+
+        for (String email : validEmails) {
+            assertTrue(validator.isValid(email));
+        }
+
+        for (String email : invalidEmails) {
+            assertFalse(validator.isValid(email));
+        }
     }
+
 
     /**
      * These test values derive directly from RFC 822 &
