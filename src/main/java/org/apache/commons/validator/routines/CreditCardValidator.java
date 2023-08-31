@@ -97,7 +97,7 @@ public class CreditCardValidator implements Serializable {
         final String high; // e.g. 34 or 65
         final int minLen; // e.g. 16 or -1
         final int maxLen; // e.g. 19 or -1
-        final int lengths[]; // e.g. 16,18,19
+        final int[] lengths; // e.g. 16,18,19
 
         /**
          * Create a credit card range specifier for use in validation
@@ -448,8 +448,8 @@ public class CreditCardValidator implements Serializable {
     // package protected for unit test access
     static boolean validLength(final int valueLength, final CreditCardRange range) {
         if (range.lengths != null) {
-            for(final int length : range.lengths) {
-                if (valueLength == length) {
+            for (int i = 0; i < range.lengths.length; ++i) {
+                if (valueLength == range.lengths[i]) {
                     return true;
                 }
             }
@@ -457,6 +457,7 @@ public class CreditCardValidator implements Serializable {
         }
         return valueLength >= range.minLen && valueLength <= range.maxLen;
     }
+
 
     // package protected for unit test access
     static CodeValidator createRangeValidator(final CreditCardRange[] creditCardRanges, final CheckDigit digitCheck) {
@@ -483,13 +484,14 @@ public class CreditCardValidator implements Serializable {
             }
 
             private boolean isValidCreditCard(String value) {
-                for (CreditCardRange range : ccr) {
-                    if (isValidRange(value, range)) {
+                for (int i = 0; i < ccr.length; ++i) {
+                    if (isValidRange(value, ccr[i])) {
                         return true;
                     }
                 }
                 return false;
             }
+
 
             private boolean isValidRange(String value, CreditCardRange range) {
                 int length = value.length();
@@ -515,13 +517,14 @@ public class CreditCardValidator implements Serializable {
             }
 
             private boolean contains(int[] array, int value) {
-                for (int item : array) {
-                    if (item == value) {
+                for (int i = 0; i < array.length; ++i) {
+                    if (array[i] == value) {
                         return true;
                     }
                 }
                 return false;
             }
+
         }, digitCheck);
     }
 
