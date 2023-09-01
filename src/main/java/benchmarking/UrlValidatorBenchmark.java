@@ -17,12 +17,9 @@
 package benchmarking;
 
 import org.apache.commons.validator.routines.DomainValidator;
-import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.openjdk.jmh.annotations.*;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,194 +36,161 @@ public class UrlValidatorBenchmark {
     private static final int WARMUP_ITERATIONS = 5;
     private static final int MEASUREMENT_ITERATIONS = 5;
 
-    private static final UrlValidator URL_VALIDATOR = UrlValidator.getInstance();
+    private static final UrlValidator URL_VALIDATOR = UrlValidator.getInstance(); //default validator
 
+    private static final String URL = "http://example.com";
+
+    private UrlValidator allow2SlashesValidator;
+    private UrlValidator allowAllSchemesValidator;
+    private UrlValidator noFragmentsValidator;
+    private UrlValidator customSchemeValidator;
+
+    private List<String> validUrls;
+    private List<String> invalidUrls;
+
+    private List<String> validSchemes;
+    private List<String> invalidSchemes;
+
+    @Setup
+    public void setup() {
+
+        // Initialize UrlValidator instances with different configuration options
+        allow2SlashesValidator = new UrlValidator(UrlValidator.ALLOW_2_SLASHES);
+        allowAllSchemesValidator = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES);
+        noFragmentsValidator = new UrlValidator(UrlValidator.NO_FRAGMENTS);
+        customSchemeValidator = new UrlValidator(new String[]{"customscheme"});
+
+        // Add valid URLs to the list
+        validUrls = new ArrayList<>();
+        validUrls.add("http://www.amazon.com");
+        validUrls.add("https://www.google.com");
+        validUrls.add("ftp://ftp.example.org");
+        validUrls.add("http://www.apache.org");
+        validUrls.add("https://www.github.com");
+        validUrls.add("ftp://ftp.gnu.org");
+        validUrls.add("2001:0db8:85a3:0000:0000:8a2e:0370:7334"); //Full IPv6 Address
+        validUrls.add("2001:0db8:0:0:0:0:0:1"); //Full IPv6 Address
+        validUrls.add("::1");  //Shorthand Notation and Loopback address
+        validUrls.add("fe80::1%eth0"); //Link-local address with zone ID
+        validUrls.add("ff02::1%wlan0"); //Multicast address with zone ID
+        validUrls.add("192.168.0.1"); //IPv4
+        validUrls.add("10.0.0.2"); //IPv4
+
+        // Add invalid URLs to the list
+        invalidUrls = new ArrayList<>();
+        invalidUrls.add("www.invalid-url"); // Missing scheme
+        invalidUrls.add("http://"); // Missing host
+        invalidUrls.add("http://example.com:8080/path?query"); // Missing path
+        invalidUrls.add("htp://www.example.com"); // Invalid scheme
+        invalidUrls.add("http://www.example.com:80/<>"); // Invalid characters in path
+        invalidUrls.add("ftp://www.example.com:invalidport"); // Invalid port
+        invalidUrls.add("http://[FEDC:BA98:7654:3210]:80/index.html"); // Missing square brackets
+        invalidUrls.add("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html"); // Extra colon
+        invalidUrls.add("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80:80/index.html"); // Extra colon
+        invalidUrls.add("http://[::1]:80/index.html"); // Valid IPv6 but missing square brackets
+        invalidUrls.add("192.168.0.300"); // Invalid range
+        invalidUrls.add("172.16.0.256");   // Invalid range
+        invalidUrls.add("10.0.0.0.1");     // Extra digits
+        invalidUrls.add("192.168.1");       // Incomplete
+
+        // Add valid URL schemes to the list
+        validSchemes = new ArrayList<>();
+        validSchemes.add("http");
+        validSchemes.add("https");
+        validSchemes.add("ftp");
+        validSchemes.add("file");
+        validSchemes.add("mailto");
+        validSchemes.add("tel");
+        validSchemes.add("data");
+
+        // Add invalid URL schemes to the list
+        invalidSchemes = new ArrayList<>();
+        invalidSchemes.add("htp"); // Invalid scheme
+        invalidSchemes.add("invalidscheme"); // Invalid scheme
+        invalidSchemes.add("123scheme"); // Invalid scheme
+        invalidSchemes.add("htt:p");    // Colon in the wrong place
+        invalidSchemes.add("ht-tp");   // Dash not allowed
+        invalidSchemes.add("ft p");    // Space not allowed
+        invalidSchemes.add("123");     // Numbers not allowed as scheme
+    }
+
+    //Major Input Size Validation
     @Benchmark
-    public void benchmarkIsValid() {
-        URL_VALIDATOR.isValid("http://www.google.com");
+    public boolean[] benchmarkIsValidForValidUrls() {
+        return getUrlsBooleans(validUrls);
     }
 
     @Benchmark
-    public void benchmarkIsValidScheme() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String scheme = "http";
-
-        Method method = UrlValidator.class.getDeclaredMethod("isValidScheme", String.class);
-        method.setAccessible(true);
-        method.invoke(URL_VALIDATOR, scheme);
-
+    public boolean[] benchmarkIsValidForInvalidUrls() {
+        return getUrlsBooleans(invalidUrls);
     }
 
-    @Benchmark
-    public void benchmarkValidator202() {
-        URL_VALIDATOR.isValid("http://l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.org");
-    }
-
-    @Benchmark
-    public void benchmarkValidator204() {
-        URL_VALIDATOR.isValid("http://tech.yahoo.com/rc/desktops/102;_ylt=Ao8yevQHlZ4On0O3ZJGXLEQFLZA5");
-    }
-
-    @Benchmark
-    public void benchmarkValidator218() {
-        URL_VALIDATOR.isValid("http://somewhere.com/pathxyz/file(1).html");
-    }
-
-    @Benchmark
-    public void benchmarkValidator235() {
-        final String version = System.getProperty("java.version");
-        if (version.compareTo("1.6") < 0) {
-            System.out.println("Cannot run Unicode IDN tests");
-            return; // Cannot run the test
+    private boolean[] getUrlsBooleans(List<String> urls) {
+        boolean[] results = new boolean[invalidUrls.size()];
+        int n = urls.size();
+        for (int i = 0; i < n; ++i) {
+            String url = urls.get(i);
+            results[i] = URL_VALIDATOR.isValid(url);
         }
+        return results;
+    }
 
-        URL_VALIDATOR.isValid("http://xn--d1abbgf6aiiy.xn--p1ai");
-        URL_VALIDATOR.isValid("http://президент.рф");
-        URL_VALIDATOR.isValid("http://www.bücher.ch");
-        URL_VALIDATOR.isValid("http://www.\uFFFD.ch");
-        URL_VALIDATOR.isValid("ftp://www.bücher.ch");
-        URL_VALIDATOR.isValid("ftp://www.\uFFFD.ch");
+    //Basic Url Validation
+
+    @Benchmark
+    public boolean validateValidBasicUrl() {
+        return URL_VALIDATOR.isValid("https://www.google.com");
     }
 
     @Benchmark
-    public void benchmarkValidator248() {
-        final RegexValidator regex = new RegexValidator("localhost", ".*\\.my-testing");
-        UrlValidator validator = new UrlValidator(regex, 0);
-
-        validator.isValid("http://localhost/test/index.html");
-        validator.isValid("http://first.my-testing/test/index.html");
-        validator.isValid("http://sup3r.my-testing/test/index.html");
-        validator.isValid("http://broke.my-test/test/index.html");
-        validator.isValid("http://www.apache.org/test/index.html");
-
-        // Now check using options
-        validator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
-
-        validator.isValid("http://localhost/test/index.html");
-        validator.isValid("http://machinename/test/index.html");
-        validator.isValid("http://www.apache.org/test/index.html");
+    public boolean validateInvalidBasicUrl() {
+        return URL_VALIDATOR.isValid("www.invalid-url");
+    }
+    @Benchmark
+    public boolean validateValidIPv4() {
+        return URL_VALIDATOR.isValid("192.168.0.1");
     }
 
     @Benchmark
-    public void benchmarkValidator288() {
-        UrlValidator validator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
-
-        validator.isValid("http://hostname");
-        validator.isValid("http://hostname/test/index.html");
-        validator.isValid("http://localhost/test/index.html");
-        validator.isValid("http://first.my-testing/test/index.html");
-        validator.isValid("http://broke.hostname/test/index.html");
-        validator.isValid("http://www.apache.org/test/index.html");
-
-        // Turn it off, and check
-        validator = new UrlValidator(0);
-
-        validator.isValid("http://hostname");
-        validator.isValid("http://localhost/test/index.html");
-        validator.isValid("http://www.apache.org/test/index.html");
+    public boolean validateInvalidIPv4() {
+        return URL_VALIDATOR.isValid("192.168.1");
     }
 
     @Benchmark
-    public void benchmarkValidator276() {
-        // file:// isn't allowed by default
-        UrlValidator validator = new UrlValidator();
-
-        validator.isValid("http://www.apache.org/test/index.html");
-        validator.isValid("file:///C:/some.file");
-        validator.isValid("file:///C:\\some.file");
-        validator.isValid("file:///etc/hosts");
-        validator.isValid("file://localhost/etc/hosts");
-        validator.isValid("file://localhost/c:/some.file");
-
-        // Turn it on, and check
-        validator = new UrlValidator(new String[]{"http", "file"}, UrlValidator.ALLOW_LOCAL_URLS);
-
-        validator.isValid("http://www.apache.org/test/index.html");
-        validator.isValid("file:///C:/some.file");
-        validator.isValid("file:///C:\\some.file");
-        validator.isValid("file:///etc/hosts");
-        validator.isValid("file://localhost/etc/hosts");
-        validator.isValid("file://localhost/c:/some.file");
+    public boolean validateValidIPv6() {
+        return URL_VALIDATOR.isValid("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
     }
 
     @Benchmark
-    public void benchmarkValidator391OK() {
-        final String[] schemes = {"file"};
-        final UrlValidator urlValidator = new UrlValidator(schemes);
-        urlValidator.isValid("file:///C:/path/to/dir/");
+    public boolean validateInvalidIPv6() {
+        return URL_VALIDATOR.isValid("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80:80/index.html");
+    }
+
+    //Schemes Validation
+    @Benchmark
+    public boolean[] benchmarkIsValidForValidSchemes() {
+        return getSchemesBooleans(validSchemes);
     }
 
     @Benchmark
-    public void benchmarkValidator391FAILS() {
-        final String[] schemes = {"file"};
-        final UrlValidator urlValidator = new UrlValidator(schemes);
-        urlValidator.isValid("file:/C:/path/to/dir/");
+    public boolean[] benchmarkIsValidForInvalidSchemes() {
+        return getSchemesBooleans(invalidSchemes);
     }
 
-    @Benchmark
-    public boolean benchmarkValidator309() {
-
-        return URL_VALIDATOR.isValid("http://sample.ondemand.com/")
-                && URL_VALIDATOR.isValid("hTtP://sample.ondemand.CoM/")
-                && URL_VALIDATOR.isValid("httpS://SAMPLE.ONEMAND.COM/")
-                && URL_VALIDATOR.isValid("http://sample.ondemand.com/")
-                && URL_VALIDATOR.isValid("hTtP://sample.ondemand.CoM/")
-                && URL_VALIDATOR.isValid("httpS://SAMPLE.ONEMAND.COM/");
+    private boolean[] getSchemesBooleans(List<String> schemes) {
+        boolean[] results = new boolean[schemes.size()];
+        int n = schemes.size();
+        for (int i = 0; i < n; ++i) {
+            String scheme = schemes.get(i);
+            String url = new StringBuilder(scheme).append("://www.example.com").toString();
+            results[i] = URL_VALIDATOR.isValid(url);
+        }
+        return results;
     }
 
+    //Domain rejections
     @Benchmark
-    public boolean benchmarkValidator339() {
-
-        return URL_VALIDATOR.isValid("http://www.cnn.com/WORLD/?hpt=sitenav") // without
-                && URL_VALIDATOR.isValid("http://www.cnn.com./WORLD/?hpt=sitenav") // with
-                && !URL_VALIDATOR.isValid("http://www.cnn.com../") // doubly dotty
-                && !URL_VALIDATOR.isValid("http://www.cnn.invalid/")
-                && !URL_VALIDATOR.isValid("http://www.cnn.invalid./"); // check . does not affect invalid domains
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator339IDN() {
-
-        return URL_VALIDATOR.isValid("http://президент.рф/WORLD/?hpt=sitenav") // without
-                && URL_VALIDATOR.isValid("http://президент.рф./WORLD/?hpt=sitenav") // with
-                && !URL_VALIDATOR.isValid("http://президент.рф..../") // very dotty
-                && !URL_VALIDATOR.isValid("http://президент.рф.../") // triply dotty
-                && !URL_VALIDATOR.isValid("http://президент.рф../"); // doubly dotty
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator342() {
-
-        return URL_VALIDATOR.isValid("http://example.rocks/")
-                && URL_VALIDATOR.isValid("http://example.rocks");
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator411() {
-
-        return URL_VALIDATOR.isValid("http://example.rocks:/")
-                && URL_VALIDATOR.isValid("http://example.rocks:0/")
-                && URL_VALIDATOR.isValid("http://example.rocks:65535/")
-                && !URL_VALIDATOR.isValid("http://example.rocks:65536/")
-                && !URL_VALIDATOR.isValid("http://example.rocks:100000/");
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator464() {
-        final String[] schemes = {"file"};
-        final UrlValidator urlValidator = new UrlValidator(schemes);
-
-        final String fileNAK = "file://bad ^ domain.com/label/test";
-        return !urlValidator.isValid(fileNAK);
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator452() {
-
-        return URL_VALIDATOR.isValid("http://[::FFFF:129.144.52.38]:80/index.html");
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator4731() { // reject null DomainValidator
+    public boolean benchmarkValidatorNullDomain() { // reject null DomainValidator
         try {
             new UrlValidator(new String[]{}, null, 0L, null);
             return false;
@@ -236,10 +200,11 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
-    public boolean benchmarkValidator4732() { // reject null DomainValidator with mismatched allowLocal
+    public boolean benchmarkValidatorMistMatchHost() { // reject mismatched allowLocal
         final List<DomainValidator.Item> items = new ArrayList<>();
         try {
-            new UrlValidator(new String[]{}, null, 0L, DomainValidator.getInstance(true, items));
+            new UrlValidator(new String[]{}, null, 0L, DomainValidator
+                    .getInstance(true, items));
             return false;
         } catch (IllegalArgumentException e) {
             return e.getMessage().equals("DomainValidator disagrees with ALLOW_LOCAL_URLS setting");
@@ -247,154 +212,81 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
-    public boolean benchmarkValidator4733() {
+    public boolean benchmarkValidatorNotLocalsAllowed() { //DomainValidator disagrees with ALLOW_LOCAL_URLS setting
         final List<DomainValidator.Item> items = new ArrayList<>();
         try {
-            new UrlValidator(new String[]{}, null, UrlValidator.ALLOW_LOCAL_URLS, DomainValidator.getInstance(false, items));
+            new UrlValidator(new String[]{}, null, UrlValidator.ALLOW_LOCAL_URLS, DomainValidator
+                    .getInstance(false, items));
             return false;
         } catch (IllegalArgumentException e) {
             return e.getMessage().equals("DomainValidator disagrees with ALLOW_LOCAL_URLS setting");
         }
     }
 
+    //Validator Mods
     @Benchmark
-    public boolean benchmarkValidator290() {
-
-        return URL_VALIDATOR.isValid("http://xn--h1acbxfam.idn.icann.org/")
-                && URL_VALIDATOR.isValid("http://test.xn--lgbbat1ad8j")
-                && URL_VALIDATOR.isValid("http://test.xn--fiqs8s")
-                && URL_VALIDATOR.isValid("http://test.xn--fiqz9s")
-                && URL_VALIDATOR.isValid("http://test.xn--wgbh1c")
-                && URL_VALIDATOR.isValid("http://test.xn--j6w193g")
-                && URL_VALIDATOR.isValid("http://test.xn--h2brj9c")
-                && URL_VALIDATOR.isValid("http://test.xn--mgbbh1a71e")
-                && URL_VALIDATOR.isValid("http://test.xn--fpcrj9c3d")
-                && URL_VALIDATOR.isValid("http://test.xn--gecrj9c")
-                && URL_VALIDATOR.isValid("http://test.xn--s9brj9c")
-                && URL_VALIDATOR.isValid("http://test.xn--xkc2dl3a5ee0h")
-                && URL_VALIDATOR.isValid("http://test.xn--45brj9c")
-                && URL_VALIDATOR.isValid("http://test.xn--mgba3a4f16a")
-                && URL_VALIDATOR.isValid("http://test.xn--mgbayh7gpa")
-                && URL_VALIDATOR.isValid("http://test.xn--mgbc0a9azcg")
-                && URL_VALIDATOR.isValid("http://test.xn--ygbi2ammx")
-                && URL_VALIDATOR.isValid("http://test.xn--wgbl6a")
-                && URL_VALIDATOR.isValid("http://test.xn--p1ai")
-                && URL_VALIDATOR.isValid("http://test.xn--mgberp4a5d4ar")
-                && URL_VALIDATOR.isValid("http://test.xn--90a3ac")
-                && URL_VALIDATOR.isValid("http://test.xn--yfro4i67o")
-                && URL_VALIDATOR.isValid("http://test.xn--clchc0ea0b2g2a9gcd")
-                && URL_VALIDATOR.isValid("http://test.xn--3e0b707e")
-                && URL_VALIDATOR.isValid("http://test.xn--fzc2c9e2c")
-                && URL_VALIDATOR.isValid("http://test.xn--xkc2al3hye2a")
-                && URL_VALIDATOR.isValid("http://test.xn--ogbpf8fl")
-                && URL_VALIDATOR.isValid("http://test.xn--kprw13d")
-                && URL_VALIDATOR.isValid("http://test.xn--kpry57d")
-                && URL_VALIDATOR.isValid("http://test.xn--o3cw4h")
-                && URL_VALIDATOR.isValid("http://test.xn--pgbs0dh")
-                && URL_VALIDATOR.isValid("http://test.xn--mgbaam7a8h");
+    public boolean validateDefault() {
+        return URL_VALIDATOR.isValid(URL);
     }
 
     @Benchmark
-    public boolean benchmarkValidator361() {
-
-        return URL_VALIDATOR.isValid("http://hello.tokyo/");
+    public boolean validateAllow2Slashes() {
+        return allow2SlashesValidator.isValid(URL);
     }
 
     @Benchmark
-    public boolean benchmarkValidator363() {
-
-        return URL_VALIDATOR.isValid("http://www.example.org/a/b/hello..world")
-                && URL_VALIDATOR.isValid("http://www.example.org/a/hello..world")
-                && URL_VALIDATOR.isValid("http://www.example.org/hello.world/")
-                && URL_VALIDATOR.isValid("http://www.example.org/hello..world/")
-                && URL_VALIDATOR.isValid("http://www.example.org/hello.world")
-                && URL_VALIDATOR.isValid("http://www.example.org/hello..world")
-                && URL_VALIDATOR.isValid("http://www.example.org/..world")
-                && URL_VALIDATOR.isValid("http://www.example.org/.../world")
-                && !URL_VALIDATOR.isValid("http://www.example.org/../world")
-                && !URL_VALIDATOR.isValid("http://www.example.org/..")
-                && !URL_VALIDATOR.isValid("http://www.example.org/../")
-                && !URL_VALIDATOR.isValid("http://www.example.org/./..")
-                && !URL_VALIDATOR.isValid("http://www.example.org/././..")
-                && URL_VALIDATOR.isValid("http://www.example.org/...");
+    public boolean validateAllowAllSchemes() {
+        return allowAllSchemesValidator.isValid(URL);
     }
 
     @Benchmark
-    public boolean benchmarkValidator375() {
+    public boolean validateNoFragments() {
+        return noFragmentsValidator.isValid(URL);
+    }
 
-        String url = "http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html";
-        if (!URL_VALIDATOR.isValid(url)) {
-            return false;
-        }
-        url = "http://[::1]:80/index.html";
-        if (!URL_VALIDATOR.isValid(url)) {
-            return false;
-        }
-        url = "http://FEDC:BA98:7654:3210:FEDC:BA98:7654:3210:80/index.html";
-        return !URL_VALIDATOR.isValid(url);
+    //Special Urls
+    @Benchmark
+    public boolean validateUrlWithUserInfo() {
+        return URL_VALIDATOR.isValid("http://user:pass@example.com");
     }
 
     @Benchmark
-    public boolean benchmarkValidator353() {
-
-        return URL_VALIDATOR.isValid("http://www.apache.org:80/path")
-                && URL_VALIDATOR.isValid("http://user:pass@www.apache.org:80/path")
-                && URL_VALIDATOR.isValid("http://user:@www.apache.org:80/path")
-                && URL_VALIDATOR.isValid("http://user@www.apache.org:80/path")
-                && URL_VALIDATOR.isValid("http://us%00er:-._~!$&'()*+,;=@www.apache.org:80/path")
-                && !URL_VALIDATOR.isValid("http://:pass@www.apache.org:80/path")
-                && !URL_VALIDATOR.isValid("http://:@www.apache.org:80/path")
-                && !URL_VALIDATOR.isValid("http://user:pa:ss@www.apache.org/path")
-                && !URL_VALIDATOR.isValid("http://user:pa@ss@www.apache.org/path");
+    public boolean validateUrlWithSpecialCharacters() {
+        return URL_VALIDATOR.isValid("http://example.com/path%20to%20resource");
     }
 
     @Benchmark
-    public boolean benchmarkValidator382() {
-
-        return URL_VALIDATOR.isValid("ftp://username:password@example.com:8042/over/there/index" +
-                ".dtb?type=animal&name=narwhal#nose");
+    public boolean validateUrlWithCustomScheme() {
+        return customSchemeValidator.isValid("customscheme://example.com");
     }
 
     @Benchmark
-    public boolean benchmarkValidator380() {
-
-        return URL_VALIDATOR.isValid("http://www.apache.org:80/path")
-                && URL_VALIDATOR.isValid("http://www.apache.org:8/path")
-                && URL_VALIDATOR.isValid("http://www.apache.org:/path");
+    public boolean validateUrlWithFragment() {
+        return URL_VALIDATOR.isValid("http://example.com#section");
     }
 
     @Benchmark
-    public boolean benchmarkValidator420() {
+    public boolean validateUrlWithPort() {
+        return URL_VALIDATOR.isValid("http://example.com:8080/path");
+    }
 
-        return !URL_VALIDATOR.isValid("http://example.com/serach?address=Main Avenue")
-                && URL_VALIDATOR.isValid("http://example.com/serach?address=Main%20Avenue")
-                && URL_VALIDATOR.isValid("http://example.com/serach?address=Main+Avenue");
+
+    @Benchmark
+    public boolean validateLocalFileUrl() {
+        return isLocalFileUrl("file://localhost/path/to/file");
+    }
+
+    private boolean isLocalFileUrl(String url) {
+        // Add your custom logic here to check if the URL is a local file URL
+        // This could involve checking the URL scheme, host, and other conditions
+
+        return url.startsWith("file://localhost/");
     }
 
     @Benchmark
-    public boolean benchmarkValidator467() {
+    public boolean validateIDNUrl() {
+        return URL_VALIDATOR.isValid("http://xn--bcher-kva.example.com"); // IDN domain example
 
-        return URL_VALIDATOR.isValid("https://example.com/some_path/path/")
-                && URL_VALIDATOR.isValid("https://example.com//somepath/path/")
-                && URL_VALIDATOR.isValid("https://example.com//some_path/path/")
-                && URL_VALIDATOR.isValid("http://example.com//_test"); // VALIDATOR-429
-    }
-
-    @Benchmark
-    public boolean benchmarkValidator283() {
-
-        return !URL_VALIDATOR.isValid("http://finance.yahoo.com/news/Owners-54B-NY-housing-apf-2493139299" +
-                ".html?x=0&ap=%fr")
-                && URL_VALIDATOR.isValid("http://finance.yahoo.com/news/Owners-54B-NY-housing-apf-2493139299" +
-                ".html?x=0&ap=%22");
-    }
-
-    @Benchmark
-    public boolean benchmarkFragments() {
-        final String[] schemes = {"http", "https"};
-        UrlValidator urlValidator = new UrlValidator(schemes, UrlValidator.NO_FRAGMENTS);
-        return !urlValidator.isValid("http://apache.org/a/b/c#frag")
-                && urlValidator.isValid("http://apache.org/a/b/c#frag");
     }
 
     public static void main(String[] args) throws Exception {
