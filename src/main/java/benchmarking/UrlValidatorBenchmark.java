@@ -39,6 +39,8 @@ public class UrlValidatorBenchmark {
     private static final UrlValidator URL_VALIDATOR = UrlValidator.getInstance(); //default validator
 
     private static final String URL = "http://example.com";
+    
+    private static final int PARAM = 1000;
 
     private UrlValidator allow2SlashesValidator;
     private UrlValidator allowAllSchemesValidator;
@@ -136,9 +138,14 @@ public class UrlValidatorBenchmark {
     }
 
     //Basic Url Validation
-
     @Benchmark
     public boolean validateValidBasicUrl() {
+        return URL_VALIDATOR.isValid("https://www.google.com");
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateValidBasicUrlMulti() {
         return URL_VALIDATOR.isValid("https://www.google.com");
     }
 
@@ -146,8 +153,20 @@ public class UrlValidatorBenchmark {
     public boolean validateInvalidBasicUrl() {
         return URL_VALIDATOR.isValid("www.invalid-url");
     }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateInvalidBasicUrlMulti() {
+        return URL_VALIDATOR.isValid("www.invalid-url");
+    }
     @Benchmark
     public boolean validateValidIPv4() {
+        return URL_VALIDATOR.isValid("192.168.0.1");
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateValidIPv4Multi() {
         return URL_VALIDATOR.isValid("192.168.0.1");
     }
 
@@ -157,7 +176,19 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateInvalidIPv4Multi() {
+        return URL_VALIDATOR.isValid("192.168.1");
+    }
+
+    @Benchmark
     public boolean validateValidIPv6() {
+        return URL_VALIDATOR.isValid("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateValidIPv6Multi() {
         return URL_VALIDATOR.isValid("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
     }
 
@@ -166,14 +197,20 @@ public class UrlValidatorBenchmark {
         return URL_VALIDATOR.isValid("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80:80/index.html");
     }
 
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateInvalidIPv6Multi() {
+        return URL_VALIDATOR.isValid("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80:80/index.html");
+    }
+
     //Schemes Validation
     @Benchmark
-    public boolean[] benchmarkIsValidForValidSchemes() {
+    public boolean[] benchmarkIsValidatorForValidSchemes() {
         return getSchemesBooleans(validSchemes);
     }
 
     @Benchmark
-    public boolean[] benchmarkIsValidForInvalidSchemes() {
+    public boolean[] benchmarkIsValidatorForInvalidSchemes() {
         return getSchemesBooleans(invalidSchemes);
     }
 
@@ -230,7 +267,19 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateDefaultMulti() {
+        return URL_VALIDATOR.isValid(URL);
+    }
+
+    @Benchmark
     public boolean validateAllow2Slashes() {
+        return allow2SlashesValidator.isValid(URL);
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateAllow2SlashesMulti() {
         return allow2SlashesValidator.isValid(URL);
     }
 
@@ -240,7 +289,19 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateAllowAllSchemesMulti() {
+        return allowAllSchemesValidator.isValid(URL);
+    }
+
+    @Benchmark
     public boolean validateNoFragments() {
+        return noFragmentsValidator.isValid(URL);
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateNoFragmentsMulti() {
         return noFragmentsValidator.isValid(URL);
     }
 
@@ -251,7 +312,19 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateUrlWithUserInfoMulti() {
+        return URL_VALIDATOR.isValid("http://user:pass@example.com");
+    }
+
+    @Benchmark
     public boolean validateUrlWithSpecialCharacters() {
+        return URL_VALIDATOR.isValid("http://example.com/path%20to%20resource");
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateUrlWithSpecialCharactersMulti() {
         return URL_VALIDATOR.isValid("http://example.com/path%20to%20resource");
     }
 
@@ -261,7 +334,18 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateUrlWithCustomSchemeMulti() {
+        return customSchemeValidator.isValid("customscheme://example.com");
+    }
+    @Benchmark
     public boolean validateUrlWithFragment() {
+        return URL_VALIDATOR.isValid("http://example.com#section");
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateUrlWithFragmentMulti() {
         return URL_VALIDATOR.isValid("http://example.com#section");
     }
 
@@ -270,9 +354,20 @@ public class UrlValidatorBenchmark {
         return URL_VALIDATOR.isValid("http://example.com:8080/path");
     }
 
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateUrlWithPortMulti() {
+        return URL_VALIDATOR.isValid("http://example.com:8080/path");
+    }
 
     @Benchmark
     public boolean validateLocalFileUrl() {
+        return isLocalFileUrl("file://localhost/path/to/file");
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateLocalFileUrlMulti() {
         return isLocalFileUrl("file://localhost/path/to/file");
     }
 
@@ -285,6 +380,13 @@ public class UrlValidatorBenchmark {
 
     @Benchmark
     public boolean validateIDNUrl() {
+        return URL_VALIDATOR.isValid("http://xn--bcher-kva.example.com"); // IDN domain example
+
+    }
+
+    @Benchmark
+    @OperationsPerInvocation(PARAM)
+    public boolean validateIDNUrlMulti() {
         return URL_VALIDATOR.isValid("http://xn--bcher-kva.example.com"); // IDN domain example
 
     }
