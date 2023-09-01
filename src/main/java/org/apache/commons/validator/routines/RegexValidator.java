@@ -134,9 +134,11 @@ public class RegexValidator implements Serializable {
         }
         patterns = new Pattern[regexs.length];
         final int flags = (caseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
-        for (int i = 0; i < regexs.length; i++) {
+        for (int i = 0; i < regexs.length; ++i) {
             if (regexs[i] == null || regexs[i].isEmpty()) {
-                throw new IllegalArgumentException("Regular expression[" + i + "] is missing");
+                StringBuilder msg = new StringBuilder("Regular expression[");
+                msg.append(i).append("] is missing");
+                throw new IllegalArgumentException(msg.toString());
             }
             patterns[i] = Pattern.compile(regexs[i], flags);
         }
@@ -163,13 +165,15 @@ public class RegexValidator implements Serializable {
         if (value == null) {
             return false;
         }
-        for (final Pattern pattern : patterns) {
+        for (int i = 0; i < patterns.length; ++i) {
+            final Pattern pattern = patterns[i];
             if (pattern.matcher(value).matches()) {
                 return true;
             }
         }
         return false;
     }
+
 
     /**
      * Validates a value against the set of regular expressions
@@ -183,12 +187,13 @@ public class RegexValidator implements Serializable {
         if (value == null) {
             return null;
         }
-        for (final Pattern pattern : patterns) {
+        for (int i = 0; i < patterns.length; ++i) {
+            final Pattern pattern = patterns[i];
             final Matcher matcher = pattern.matcher(value);
             if (matcher.matches()) {
                 final int count = matcher.groupCount();
                 final String[] groups = new String[count];
-                for (int j = 0; j < count; j++) {
+                for (int j = 0; j < count; ++j) {
                     groups[j] = matcher.group(j + 1);
                 }
                 return groups;
@@ -196,6 +201,7 @@ public class RegexValidator implements Serializable {
         }
         return null;
     }
+
 
 
     /**
@@ -210,7 +216,8 @@ public class RegexValidator implements Serializable {
         if (value == null) {
             return null;
         }
-        for (final Pattern pattern : patterns) {
+        for (int i = 0; i < patterns.length; ++i) {
+            final Pattern pattern = patterns[i];
             final Matcher matcher = pattern.matcher(value);
             if (matcher.matches()) {
                 final int count = matcher.groupCount();
@@ -218,8 +225,8 @@ public class RegexValidator implements Serializable {
                     return matcher.group(1);
                 }
                 final StringBuilder buffer = new StringBuilder();
-                for (int j = 0; j < count; j++) {
-                    final String component = matcher.group(j+1);
+                for (int j = 0; j < count; ++j) {
+                    final String component = matcher.group(j + 1);
                     if (component != null) {
                         buffer.append(component);
                     }
@@ -230,6 +237,7 @@ public class RegexValidator implements Serializable {
         return null;
     }
 
+
     /**
      * Provides a String representation of this validator.
      * @return A String representation of this validator.
@@ -238,7 +246,7 @@ public class RegexValidator implements Serializable {
     public String toString() {
         final StringBuilder buffer = new StringBuilder();
         buffer.append("RegexValidator{");
-        for (int i = 0; i < patterns.length; i++) {
+        for (int i = 0; i < patterns.length; ++i) {
             if (i > 0) {
                 buffer.append(",");
             }

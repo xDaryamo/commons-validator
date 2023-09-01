@@ -118,10 +118,15 @@ public final class IBANCheckDigit implements CheckDigit, Serializable {
     private int calculateModulus(final String code) throws CheckDigitException {
         final String reformattedCode = code.substring(4) + code.substring(0, 4); // CHECKSTYLE IGNORE MagicNumber
         long total = 0;
-        for (int i = 0; i < reformattedCode.length(); i++) {
+        int size = reformattedCode.length();
+        for (int i = 0; i < size; ++i) {
             final int charValue = Character.getNumericValue(reformattedCode.charAt(i));
             if (charValue < 0 || charValue > MAX_ALPHANUMERIC_VALUE) {
-                throw new CheckDigitException("Invalid Character[" + i + "] = '" + charValue + "'");
+
+                StringBuilder msg = new StringBuilder("Invalid Character[").append(i).append("] = '")
+                        .append(charValue).append("'");
+
+                throw new CheckDigitException(msg.toString());
             }
             total = (charValue > 9 ? total * 100 : total * 10) + charValue; // CHECKSTYLE IGNORE MagicNumber
             if (total > MAX) {

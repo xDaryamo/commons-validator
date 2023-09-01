@@ -93,7 +93,8 @@ public class InetAddressValidator implements Serializable {
         }
 
         // verify that address subgroups are legal
-        for (final String ipSegment : groups) {
+        for (int i = 0; i < groups.length; ++i) {
+            final String ipSegment = groups[i];
             if (ipSegment == null || ipSegment.isEmpty()) {
                 return false;
             }
@@ -102,7 +103,7 @@ public class InetAddressValidator implements Serializable {
 
             try {
                 iIpSegment = Integer.parseInt(ipSegment);
-            } catch(final NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return false;
             }
 
@@ -113,11 +114,11 @@ public class InetAddressValidator implements Serializable {
             if (ipSegment.length() > 1 && ipSegment.startsWith("0")) {
                 return false;
             }
-
         }
 
         return true;
     }
+
 
     /**
      * Validates an IPv6 address. Returns true if valid.
@@ -158,10 +159,10 @@ public class InetAddressValidator implements Serializable {
         int emptyOctets = 0; // consecutive empty chunks
 
 
-        for (int index = 0; index < octets.length; index++) {
+        for (int index = 0; index < octets.length; ++index) {
             final String octet = octets[index];
             if (octet.isEmpty()) {
-                emptyOctets++;
+                ++emptyOctets;
                 if (emptyOctets > 1) {
                     return null;
                 }
@@ -180,7 +181,7 @@ public class InetAddressValidator implements Serializable {
 
 
             }
-            validOctets++;
+            ++validOctets;
         }
         return validOctets;
     }

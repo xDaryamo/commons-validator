@@ -107,7 +107,8 @@ public abstract class ModulusCheckDigit implements CheckDigit, Serializable {
      */
     protected int calculateModulus(final String code, final boolean includesCheckDigit) throws CheckDigitException {
         int total = 0;
-        for (int i = 0; i < code.length(); i++) {
+        int size = code.length();
+        for (int i = 0; i < size; ++i) {
             final int lth = code.length() + (includesCheckDigit ? 0 : 1);
             final int leftPos  = i + 1;
             final int rightPos = lth - i;

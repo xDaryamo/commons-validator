@@ -111,12 +111,15 @@ public final class VerhoeffCheckDigit implements CheckDigit, Serializable {
      */
     private int calculateChecksum(final String code, final boolean includesCheckDigit) throws CheckDigitException {
         int checksum = 0;
-        for (int i = 0; i < code.length(); i++) {
+        int size = code.length();
+        for (int i = 0; i < size; ++i) {
             final int idx = code.length() - (i + 1);
             final int num = Character.getNumericValue(code.charAt(idx));
             if (num < 0 || num > 9) { // CHECKSTYLE IGNORE MagicNumber
-                throw new CheckDigitException("Invalid Character[" +
-                        i + "] = '" + ((int)code.charAt(idx)) + "'");
+
+                StringBuilder msg = new StringBuilder("Invalid Character[").append(i).append("] = '")
+                        .append((int)code.charAt(idx)).append("'");
+                throw new CheckDigitException(msg.toString());
             }
             final int pos = includesCheckDigit ? i : i + 1;
             checksum = D_TABLE[checksum][P_TABLE[pos % 8][num]]; // CHECKSTYLE IGNORE MagicNumber

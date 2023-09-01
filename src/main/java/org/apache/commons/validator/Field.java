@@ -166,7 +166,7 @@ public class Field implements Serializable {
 
         // Cloning the arguments
         this.args = new Map[other.args.length];
-        for (int i = 0; i < other.args.length; i++) {
+        for (int i = 0; i < other.args.length; ++i) {
             if (other.args[i] != null) {
                 this.args[i] = new HashMap<>(other.args[i]);
             }
@@ -402,7 +402,7 @@ public class Field implements Serializable {
         final String keyName = arg.getName() == null ? DEFAULT_ARG : arg.getName();
         int lastPosition = -1;
         int lastDefault  = -1;
-        for (int i = 0; i < args.length; i++) {
+        for (int i = 0; i < args.length; ++i) {
             if (args[i] != null && args[i].containsKey(keyName)) {
                 lastPosition = i;
             }
@@ -482,7 +482,7 @@ public class Field implements Serializable {
     public Arg[] getArgs(final String key){
         final Arg[] argList = new Arg[this.args.length];
 
-        for (int i = 0; i < this.args.length; i++) {
+        for (int i = 0; i < this.args.length; ++i) {
             argList[i] = this.getArg(key, i);
         }
 
@@ -663,17 +663,21 @@ public class Field implements Serializable {
      * pairs passed in.
      */
     private void processArg(final String key, final String replaceValue) {
-        for (final Map<String, Arg> argMap : this.args) {
+        for (int i = 0; i < this.args.length; ++i) {
+            Map<String, Arg> argMap = this.args[i];
             if (argMap == null) {
                 continue;
             }
-            for (final Arg arg : argMap.values()) {
+            for (Map.Entry<String, Arg> entry : argMap.entrySet()) {
+                String argKey = entry.getKey();
+                Arg arg = entry.getValue();
                 if (arg != null) {
-                    arg.setKey(ValidatorUtils.replace(arg.getKey(), key, replaceValue));
+                    arg.setKey(ValidatorUtils.replace(argKey, key, replaceValue));
                 }
             }
         }
     }
+
 
     /**
      * Checks if the validator is listed as a dependency.
@@ -871,7 +875,7 @@ public class Field implements Serializable {
         final int numberOfFieldsToValidate =
             this.isIndexed() ? this.getIndexedPropertySize(bean) : 1;
 
-        for (int fieldNumber = 0; fieldNumber < numberOfFieldsToValidate; fieldNumber++) {
+        for (int fieldNumber = 0; fieldNumber < numberOfFieldsToValidate; ++fieldNumber) {
 
             final ValidatorResults results = new ValidatorResults();
             synchronized(dependencyList) {

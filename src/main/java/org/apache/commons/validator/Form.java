@@ -179,33 +179,36 @@ public class Form implements Serializable {
             return;
         }
 
-        int n = 0;//we want the fields from its parent first
+        int n = 0; // We want the fields from its parent first
         if (isExtending()) {
             final Form parent = forms.get(inherit);
             if (parent != null) {
                 if (!parent.isProcessed()) {
-                    //we want to go all the way up the tree
+                    // We want to go all the way up the tree
                     parent.process(globalConstants, constants, forms);
                 }
                 for (final Field f : parent.getFields()) {
-                    //we want to be able to override any fields we like
+                    // We want to be able to override any fields we like
                     if (getFieldMap().get(f.getKey()) == null) {
                         lFields.add(n, f);
                         getFieldMap().put(f.getKey(), f);
-                        n++;
+                        ++n;
                     }
                 }
             }
         }
         hFields.setFast(true);
-        //no need to reprocess parent's fields, we iterate from 'n'
-        for (final Iterator<Field> i = lFields.listIterator(n); i.hasNext(); ) {
+
+        // No need to reprocess parent's fields, we iterate from 'n'
+        Iterator<Field> i = lFields.listIterator(n);
+        while (i.hasNext()) {
             final Field f = i.next();
             f.process(globalConstants, constants);
         }
 
         processed = true;
     }
+
 
     /**
      * Returns a string representation of the object.

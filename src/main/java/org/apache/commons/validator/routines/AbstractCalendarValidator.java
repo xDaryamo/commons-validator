@@ -66,7 +66,7 @@ public abstract class AbstractCalendarValidator extends AbstractFormatValidator 
     @Override
     public boolean isValid(final String value, final String pattern, final Locale locale) {
         final Object parsedValue = parse(value, pattern, locale, (TimeZone)null);
-        return (parsedValue == null ? false : true);
+        return (parsedValue != null);
     }
 
     /**
@@ -272,48 +272,38 @@ public abstract class AbstractCalendarValidator extends AbstractFormatValidator 
      *         if it is less than the second or +1 if it is greater than the second.
      */
     protected int compare(final Calendar value, final Calendar compare, final int field) {
-
         int result;
 
-        // Compare Year
-        result = calculateCompareResult(value, compare, Calendar.YEAR);
-        if (result != 0 || field == Calendar.YEAR) {
-            return result;
-        }
+        switch (field) {
+            case Calendar.YEAR:
+                result = calculateCompareResult(value, compare, Calendar.YEAR);
+                return result;
 
-        // Compare Week of Year
-        if (field == Calendar.WEEK_OF_YEAR) {
-            return calculateCompareResult(value, compare, Calendar.WEEK_OF_YEAR);
-        }
+            case Calendar.WEEK_OF_YEAR:
+                return calculateCompareResult(value, compare, Calendar.WEEK_OF_YEAR);
 
-        // Compare Day of the Year
-        if (field == Calendar.DAY_OF_YEAR) {
-            return calculateCompareResult(value, compare, Calendar.DAY_OF_YEAR);
-        }
+            case Calendar.DAY_OF_YEAR:
+                return calculateCompareResult(value, compare, Calendar.DAY_OF_YEAR);
 
-        // Compare Month
-        result = calculateCompareResult(value, compare, Calendar.MONTH);
-        if (result != 0 || field == Calendar.MONTH) {
-            return result;
-        }
+            case Calendar.MONTH:
+                result = calculateCompareResult(value, compare, Calendar.MONTH);
+                return result;
 
-        // Compare Week of Month
-        if (field == Calendar.WEEK_OF_MONTH) {
-            return calculateCompareResult(value, compare, Calendar.WEEK_OF_MONTH);
-        }
+            case Calendar.WEEK_OF_MONTH:
+                return calculateCompareResult(value, compare, Calendar.WEEK_OF_MONTH);
 
-        // Compare Date
-        result = calculateCompareResult(value, compare, Calendar.DATE);
-        if (result != 0 || (field == Calendar.DATE ||
-                          field == Calendar.DAY_OF_WEEK ||
-                          field == Calendar.DAY_OF_WEEK_IN_MONTH)) {
-            return result;
-        }
+            case Calendar.DATE:
+            case Calendar.DAY_OF_WEEK:
+            case Calendar.DAY_OF_WEEK_IN_MONTH:
+                result = calculateCompareResult(value, compare, Calendar.DATE);
+                return result;
 
-        // Compare Time fields
-        return compareTime(value, compare, field);
+            default:
+                return compareTime(value, compare, field);
+        }
 
     }
+
 
     /**
      * <p>Compares a calendar time value to another, indicating whether it is
@@ -328,35 +318,33 @@ public abstract class AbstractCalendarValidator extends AbstractFormatValidator 
      *         if it is less than the second or +1 if it is greater than the second.
      */
     protected int compareTime(final Calendar value, final Calendar compare, final int field) {
-
         int result;
 
-        // Compare Hour
-        result = calculateCompareResult(value, compare, Calendar.HOUR_OF_DAY);
-        if (result != 0 || (field == Calendar.HOUR || field == Calendar.HOUR_OF_DAY)) {
-            return result;
+        switch (field) {
+            case Calendar.HOUR:
+            case Calendar.HOUR_OF_DAY:
+                result = calculateCompareResult(value, compare, Calendar.HOUR_OF_DAY);
+                return result;
+            // Fallthrough to compare minutes if necessary
+
+            case Calendar.MINUTE:
+                result = calculateCompareResult(value, compare, Calendar.MINUTE);
+                return result;
+            // Fallthrough to compare seconds if necessary
+
+            case Calendar.SECOND:
+                result = calculateCompareResult(value, compare, Calendar.SECOND);
+                return result;
+            // Fallthrough to compare milliseconds if necessary
+
+            case Calendar.MILLISECOND:
+                return calculateCompareResult(value, compare, Calendar.MILLISECOND);
+
+            default:
+                throw new IllegalArgumentException("Invalid field: " + field);
         }
-
-        // Compare Minute
-        result = calculateCompareResult(value, compare, Calendar.MINUTE);
-        if (result != 0 || field == Calendar.MINUTE) {
-            return result;
-        }
-
-        // Compare Second
-        result = calculateCompareResult(value, compare, Calendar.SECOND);
-        if (result != 0 || field == Calendar.SECOND) {
-            return result;
-        }
-
-        // Compare Milliseconds
-        if (field == Calendar.MILLISECOND) {
-            return calculateCompareResult(value, compare, Calendar.MILLISECOND);
-        }
-
-        throw new IllegalArgumentException("Invalid field: " + field);
-
     }
+
 
     /**
      * <p>Compares a calendar's quarter value to another, indicating whether it is
@@ -369,16 +357,19 @@ public abstract class AbstractCalendarValidator extends AbstractFormatValidator 
      *         if it is less than the second or +1 if it is greater than the second.
      */
     protected int compareQuarters(final Calendar value, final Calendar compare, final int monthOfFirstQuarter) {
-        final int valueQuarter   = calculateQuarter(value, monthOfFirstQuarter);
+        final int valueQuarter = calculateQuarter(value, monthOfFirstQuarter);
         final int compareQuarter = calculateQuarter(compare, monthOfFirstQuarter);
-        if (valueQuarter < compareQuarter) {
-            return -1;
+
+        switch (Integer.compare(valueQuarter, compareQuarter)) {
+            case -1:
+                return -1;
+            case 1:
+                return 1;
+            default:
+                return 0;
         }
-        if (valueQuarter > compareQuarter) {
-            return 1;
-        }
-        return 0;
     }
+
 
     /**
      * <p>Calculate the quarter for the specified Calendar.</p>
@@ -415,13 +406,16 @@ public abstract class AbstractCalendarValidator extends AbstractFormatValidator 
      *         if it is less than the seconds or +1 if it is greater than the seconds.
      */
     private int calculateCompareResult(final Calendar value, final Calendar compare, final int field) {
-        final int difference = value.get(field) - compare.get(field);
-        if (difference < 0) {
-            return -1;
+        int difference = value.get(field) - compare.get(field);
+
+        switch (Integer.compare(difference, 0)) {
+            case -1:
+                return -1;
+            case 1:
+                return 1;
+            default:
+                return 0;
         }
-        if (difference > 0) {
-            return 1;
-        }
-        return 0;
     }
+
 }

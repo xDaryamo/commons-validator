@@ -218,7 +218,7 @@ public class DomainValidator implements Serializable {
         for(final Item item: items) {
             final String [] copy = new String[item.values.length];
             // Comparisons are always done with lower-case entries
-            for (int i = 0; i < item.values.length; i++) {
+            for (int i = 0; i < item.values.length; ++i) {
                 copy[i] = item.values[i].toLowerCase(Locale.ENGLISH);
             }
             Arrays.sort(copy);
@@ -2124,7 +2124,7 @@ public class DomainValidator implements Serializable {
         }
         final String [] copy = new String[tlds.length];
         // Comparisons are always done with lower-case entries
-        for (int i = 0; i < tlds.length; i++) {
+        for (int i = 0; i < tlds.length; ++i) {
             copy[i] = tlds[i].toLowerCase(Locale.ENGLISH);
         }
         Arrays.sort(copy);
@@ -2293,7 +2293,8 @@ public class DomainValidator implements Serializable {
         if (input == null) {
             return true;
         }
-        for(int i=0; i < input.length(); i++) {
+        int length = input.length();
+        for(int i=0; i < length; ++i) {
             if (input.charAt(i) > 0x7F) { // CHECKSTYLE IGNORE MagicNumber
                 return false;
             }
