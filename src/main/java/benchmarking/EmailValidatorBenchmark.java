@@ -19,14 +19,19 @@ package benchmarking;
 import org.apache.commons.validator.routines.*;
 import org.openjdk.jmh.annotations.*;
 
+import static org.openjdk.jmh.runner.Defaults.MEASUREMENT_ITERATIONS;
+import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
+
+
 @BenchmarkMode(Mode.Throughput)
-@Warmup(iterations = 5, time = 1)
-@Measurement(iterations = 5, time = 1)
+@Warmup(iterations = WARMUP_ITERATIONS, time = 1)
+@Measurement(iterations = MEASUREMENT_ITERATIONS, time = 1)
 @Fork(1)
 @State(Scope.Benchmark)
 public class EmailValidatorBenchmark {
-
-    private static final EmailValidator emailValidator = EmailValidator.getInstance();
+    private static final int WARMUP_ITERATIONS = 5;
+    private static final int MEASUREMENT_ITERATIONS = 5;
+    private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
 
     // Valid email
     String validEmail = "jsmith@apache.org";
@@ -68,57 +73,57 @@ public class EmailValidatorBenchmark {
 
     @Benchmark
     public boolean benchmarkEmailValidation() {
-        return emailValidator.isValid(validEmail);
+        return EMAIL_VALIDATOR.isValid(validEmail);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithNumericAddress() {
-        return emailValidator.isValid(emailWithNumericDomain);
+        return EMAIL_VALIDATOR.isValid(emailWithNumericDomain);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationExtension() {
-        return emailValidator.isValid(emailWithValidExtension);
+        return EMAIL_VALIDATOR.isValid(emailWithValidExtension);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationInvalidExtension() {
-        return emailValidator.isValid(emailWithInvalidExtension);
+        return EMAIL_VALIDATOR.isValid(emailWithInvalidExtension);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithDash() {
-        return emailValidator.isValid(emailWithDash);
+        return EMAIL_VALIDATOR.isValid(emailWithDash);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithDotAtEnd() {
-        return emailValidator.isValid(emailWithDotAtEnd);
+        return EMAIL_VALIDATOR.isValid(emailWithDotAtEnd);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithInvalidCharacter() {
-        return emailValidator.isValid(emailWithInvalidCharacter);
+        return EMAIL_VALIDATOR.isValid(emailWithInvalidCharacter);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithPlusAddress() {
-        return emailValidator.isValid(emailWithPlusSymbol);
+        return EMAIL_VALIDATOR.isValid(emailWithPlusSymbol);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithPlusExtension() {
-        return emailValidator.isValid(emailWithPlusSymbolExt);
+        return EMAIL_VALIDATOR.isValid(emailWithPlusSymbolExt);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationWithSpaces() {
-        return emailValidator.isValid(emailWithSpaces);
+        return EMAIL_VALIDATOR.isValid(emailWithSpaces);
     }
 
     @Benchmark
     public boolean benchmarkEmailValidationControlChars() {
-        return emailValidator.isValid(emailWithControlCharacters);
+        return EMAIL_VALIDATOR.isValid(emailWithControlCharacters);
     }
 
     @Benchmark
