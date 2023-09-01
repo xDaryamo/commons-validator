@@ -23,7 +23,7 @@ import static org.openjdk.jmh.runner.Defaults.MEASUREMENT_ITERATIONS;
 import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 
 
-@BenchmarkMode(Mode.Throughput)
+@BenchmarkMode(Mode.AverageTime)
 @Warmup(iterations = WARMUP_ITERATIONS, time = 1)
 @Measurement(iterations = MEASUREMENT_ITERATIONS, time = 1)
 @Fork(1)
