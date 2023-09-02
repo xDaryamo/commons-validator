@@ -112,12 +112,12 @@ public class ISINValidatorBenchmark {
             }
 
             // Generate the next nine characters (NSIN)
-            for (int j = 0; j < 9; j++) {
+            for (int j = 0; j < 9; j++) { // CHECKSTYLE IGNORE MagicNumber
                 isin.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
             }
 
             // Generate the check digit
-            isin.append(random.nextInt(10)); // A random digit (0-9)
+            isin.append(random.nextInt(10)); // A random digit (0-9) // CHECKSTYLE IGNORE MagicNumber
 
             // Validate the generated ISIN to ensure it's valid
             if (isinValidator.isValid(isin.toString())) {
