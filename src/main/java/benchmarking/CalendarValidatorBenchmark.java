@@ -44,8 +44,8 @@ public class CalendarValidatorBenchmark {
     public void setup() {
         calendarValidator = CalendarValidator.getInstance();
 
-        multipleValidDates = generateValidDates(1000);
-        multipleInvalidDates = generateInvalidDates(1000);
+        multipleValidDates = generateValidDates(1000);// CHECKSTYLE IGNORE MagicNumber
+        multipleInvalidDates = generateInvalidDates(1000);// CHECKSTYLE IGNORE MagicNumber
     }
 
     @Benchmark
