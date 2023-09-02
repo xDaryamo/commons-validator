@@ -19,11 +19,9 @@ package benchmarking;
 import org.apache.commons.validator.routines.CreditCardValidator;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import static org.openjdk.jmh.runner.Defaults.MEASUREMENT_ITERATIONS;
 import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 
@@ -36,154 +34,127 @@ public class CreditCardValidatorBenchmark {
 
     private CreditCardValidator creditCardValidator;
     private static final int THREADS = 4;
-    private static final int DATASET = 10000;
+    private static final int DATASET = 1000;
+
+    private CreditCardValidator validVisaValidator;
+    private CreditCardValidator invalidVisaValidator;
+    private StringBuilder invalidVisaNumber;
+    private CreditCardValidator masterCardValidator;
+    private CreditCardValidator invalidMasterCardValidator;
+    private StringBuilder invalidMasterCardNumber;
+    private CreditCardValidator validAmexValidator;
+    private CreditCardValidator invalidAmexValidator;
+    private StringBuilder invalidAmexCardNumber;
+    private List<String> creditCardNumbers;
+    private final String[] mixedCardNumbers = {
+            "4111111111111111", // Valid Visa card
+            "5555555555554444", // Valid MasterCard
+            "3782822463PARAM5",  // Valid American Express card
+            "1234567890123456"  // Invalid card
+    };
 
     @Setup
     public void setup() {
+
+        Random random = new Random();
+
         creditCardValidator = CreditCardValidator.genericCreditCardValidator(); // default card
+        validVisaValidator = new CreditCardValidator(CreditCardValidator.VISA); //valid visa
+
+        invalidVisaValidator = new CreditCardValidator(CreditCardValidator.VISA); //invalid visa
+        invalidVisaNumber = new StringBuilder("4");
+        for (int i = 0; i < 16; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            invalidVisaNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
+        }
+        // Make the last digit of the card number invalid
+        invalidVisaNumber.setCharAt(15, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
+
+        masterCardValidator = new CreditCardValidator(CreditCardValidator.MASTERCARD); //valid mastercard
+
+        invalidMasterCardValidator = new CreditCardValidator(CreditCardValidator.MASTERCARD); //invalid mastercard
+        invalidMasterCardNumber = new StringBuilder("5");
+        for (int i = 0; i < 16; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            invalidMasterCardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
+        }
+        // Make the last digit of the card number invalid
+        invalidMasterCardNumber.setCharAt(15, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
+
+        validAmexValidator = new CreditCardValidator(CreditCardValidator.AMEX); //valid amex
+
+        invalidAmexValidator = new CreditCardValidator(CreditCardValidator.AMEX); //invalid amex
+        invalidAmexCardNumber = new StringBuilder("37");
+
+        for (int i = 0; i < 14; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            invalidAmexCardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
+        }
+        // Make the last digit of the card number invalid
+        invalidAmexCardNumber.setCharAt(13, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
+
+        creditCardNumbers = generateLargeDataSet(); // Generate a large data set of credit card numbers
+
     }
 
     // Edge case: Short credit card number (less than 13 digits)
     @Benchmark
-    public void validateShortCreditCard() {
-        creditCardValidator.isValid("123456789012"); // Example of a short card number
+    public void validateShortCreditCard(Blackhole bh) {
+        boolean isValid = creditCardValidator.isValid("123456789012"); // Example of a short card number
+        bh.consume(isValid);
     }
 
 
     // Edge case: Very long credit card number (more than 19 digits)
     @Benchmark
-    public void validateLongCreditCard() {
-        creditCardValidator.isValid("12345678901234567890"); // Example of a long card number
+    public void validateLongCreditCard(Blackhole bh) {
+        boolean isValid = creditCardValidator.isValid("12345678901234567890"); // Example of a long card number
+        bh.consume(isValid);
     }
 
     // Benchmark for a valid Visa card
     @Benchmark
-    public void validateValidVisaCard() {
-        CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.VISA);
-        validator.isValid("4111111111111111"); // Example of a valid Visa card
+    public void validateValidVisaCard(Blackhole bh) {
+        boolean isValid = validVisaValidator.isValid("4111111111111111"); // Example of a valid Visa card
+        bh.consume(isValid);
     }
 
     // Benchmark for an invalid VisaCard
     @Benchmark
     public void validateInvalidVisaCard(Blackhole bh) {
-        CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.VISA);
-
-        Random random = new Random();
-        StringBuilder cardNumber = new StringBuilder("4");
-
-        for (int i = 0; i < 16; ++i) { // CHECKSTYLE IGNORE MagicNumber
-            cardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
-        }
-
-        // Make the last digit of the card number invalid
-        cardNumber.setCharAt(15, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
-
-        boolean isValid = validator.isValid(cardNumber.toString());
+        boolean isValid = invalidVisaValidator.isValid(invalidVisaNumber.toString());
         bh.consume(isValid);
 
     }
 
     // Benchmark for a valid MasterCard
     @Benchmark
-    public void validateValidMasterCard() {
-        CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.MASTERCARD);
-        validator.isValid("5555555555554444"); // Example of a valid MasterCard
+    public void validateValidMasterCard(Blackhole bh) {
+        boolean isValid = masterCardValidator.isValid("5555555555554444"); // Example of a valid MasterCard
+        bh.consume(isValid);
     }
 
     // Benchmark for an invalid MasterCard
     @Benchmark
     public void validateInvalidMasterCard(Blackhole bh) {
-        CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.MASTERCARD);
-
-        Random random = new Random();
-        StringBuilder cardNumber = new StringBuilder("5");
-
-        for (int i = 0; i < 16; ++i) { // CHECKSTYLE IGNORE MagicNumber
-            cardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
-        }
-
-        // Make the last digit of the card number invalid
-        cardNumber.setCharAt(15, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
-
-        boolean isValid = validator.isValid(cardNumber.toString());
+        boolean isValid = invalidMasterCardValidator.isValid(invalidMasterCardNumber.toString());
         bh.consume(isValid);
-
     }
 
     // Benchmark for a valid American Express card
     @Benchmark
     public void validateValidAmexCard(Blackhole bh) {
-        CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.AMEX);
-        boolean isValid = validator.isValid("3782822463PARAM5"); // Example of a valid American Express card
+        boolean isValid = validAmexValidator.isValid("3782822463PARAM5"); // Example of a valid American Express card
         bh.consume(isValid);
     }
 
     // Benchmark for an invalid American Express card
     @Benchmark
     public void validateInvalidAmexCard(Blackhole bh) {
-        CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.AMEX);
-
-        Random random = new Random();
-        StringBuilder cardNumber = new StringBuilder("37");
-
-        for (int i = 0; i < 14; ++i) { // CHECKSTYLE IGNORE MagicNumber
-            cardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
-        }
-
-        // Make the last digit of the card number invalid
-        cardNumber.setCharAt(13, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
-
-        boolean isValid = validator.isValid(cardNumber.toString());
+        boolean isValid = invalidAmexValidator.isValid(invalidAmexCardNumber.toString());
         bh.consume(isValid);
-
-    }
-
-    // Benchmark for concurrent validation with multiple threads
-    @Benchmark
-    @Threads(THREADS) // Adjust the number of threads as needed
-    public void validateConcurrently(Blackhole bh) throws InterruptedException {
-        // Create an array of credit card numbers to validate
-        String[] creditCardNumbers = {
-                "4111111111111111", // Valid Visa card
-                "5555555555554444", // Valid MasterCard
-                "3782822463PARAM5",  // Valid American Express card
-                "1234567890123456"  // Invalid card
-        };
-
-        // Create an array of threads
-        Thread[] threads = new Thread[creditCardNumbers.length];
-
-        // Create an array of results
-        boolean[] results = new boolean[creditCardNumbers.length];
-
-        // Start the threads
-        for (int i = 0; i < threads.length; ++i) {
-            final String cardNumber = creditCardNumbers[i];
-            final int index = i;
-            threads[i] = new Thread(() -> {
-                results[index] = creditCardValidator.isValid(cardNumber);
-            });
-            threads[i].start();
-        }
-
-        // Wait for all threads to complete
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
-        // Consume results
-        for (boolean result : results) {
-            bh.consume(result);
-        }
     }
 
     // Benchmark for validating a large data set of credit card numbers
     @Benchmark
     public void validateLargeDataSet(Blackhole bh) {
-
-        List<String> creditCardNumbers;
-        creditCardNumbers = generateLargeDataSet(); // Generate a large data set of credit card numbers
-
         for (String cardNumber : creditCardNumbers) {
             boolean isValid = creditCardValidator.isValid(cardNumber);
             bh.consume(isValid);

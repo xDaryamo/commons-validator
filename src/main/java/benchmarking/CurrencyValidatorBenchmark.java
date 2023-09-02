@@ -32,110 +32,119 @@ public class CurrencyValidatorBenchmark {
     private static final int MEASUREMENT_ITERATIONS = 5;
     private CurrencyValidator currencyValidator;
 
+    private final String[] invalidEntry = new String[]{
+            "EUR 25.5A",
+            "USD 150.0B",
+            "GBP 120E0.N5",
+            "JPY 320Q.99",
+            "CAD 12C.45",
+            "EUR 35R.5",
+            "USD 122AA0.12",
+            "GBP 120Y0.35",
+            "JPY 9F99.99",
+            "CAD 150LP00.45",
+            "EUR 32YY.5",
+            "USD 150WW00.0",
+            "GBP 120000.3H",
+            "JPY 32056EQ.99",
+            "CAD 451GHB2.45",
+            "EUR 16672L5.5",
+            "USD 152T.1R2",
+            "GBP 450T670.Y50",
+            "JPY 78PA12.9P",
+            "CAD 11D67.45",
+            "EUR 1ZX251.24",
+            "USD 4OL152.12",
+            "GBP 45CB60.50",
+            "JPY 71MN2.99",
+            "CAD 16ZA07.45",
+    };
+    private final String[] validEntry = new String[]{
+            "EUR 25.5",
+            "USD 150.0",
+            "GBP 1200.35",
+            "JPY 320.99",
+            "CAD 12.45",
+            "EUR 35.5",
+            "USD 1220.12",
+            "GBP 1200.35",
+            "JPY 999.99",
+            "CAD 15000.45",
+            "EUR 32.5",
+            "USD 1500000.0",
+            "GBP 120000.35",
+            "JPY 3205670.99",
+            "CAD 4512.45",
+            "EUR 166725.5",
+            "USD 152.12",
+            "GBP 450670.50",
+            "JPY 78212.99",
+            "CAD 11167.45",
+            "EUR 167251.24",
+            "USD 444152.12",
+            "GBP 4560.50",
+            "JPY 71212.99",
+            "CAD 168907.45",
+    };
+
+    private StringBuilder longValidEntry;
+    private StringBuilder longInvalidEntry;
+
     @Setup
-    public void setup() {currencyValidator = (CurrencyValidator) CurrencyValidator.getInstance();}
+    public void setup() {
+        currencyValidator = (CurrencyValidator) CurrencyValidator.getInstance();
+
+        longValidEntry = new StringBuilder("EUR");
+        for (int i = 0; i < 700; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            longValidEntry.append("5");
+        }
+        longValidEntry.append(".").append("55");
+
+        longInvalidEntry = new StringBuilder("EUR");
+        for (int i = 0; i < 700; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            longInvalidEntry.append("5");
+        }
+        longInvalidEntry.append(".").append("5").append("A");
+    }
 
     @Benchmark
     public void validateSingleShortValidEntry(Blackhole bh) {
-        String validEntry = "EUR 25.5";
-
-        boolean isValid = currencyValidator.isValid(validEntry, String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
-
+        boolean isValid = currencyValidator.isValid("EUR 25.5", String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
         bh.consume(isValid);
     }
 
     @Benchmark
     public void validateSingleShortInvalidEntry(Blackhole bh) {
-
-        String invalidEntry = "EUR 25.5R";
-
-        boolean isValid = currencyValidator.isValid(invalidEntry, String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
-
+        boolean isValid = currencyValidator.isValid("EUR 25.5R", String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
         bh.consume(isValid);
-
     }
 
     @Benchmark
     public void validateSingleLongValidEntry(Blackhole bh) {
-        String validEntry = "USD 2032479382479264936473.45";
-
-        boolean isValid = currencyValidator.isValid(validEntry, String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
-
+        boolean isValid = currencyValidator.isValid("USD 2032479382479264936473.45", String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
         bh.consume(isValid);
     }
 
     @Benchmark
     public void validateSingleLongInvalidEntry(Blackhole bh) {
-
-        String invalidEntry = "USD 201278132518A527185231723.34";
-
-        boolean isValid = currencyValidator.isValid(invalidEntry, String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
-
+        boolean isValid = currencyValidator.isValid("USD 201278132518A527185231723.34", String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
         bh.consume(isValid);
-
     }
 
     @Benchmark
     public void validateSingleVeryLongValidEntry(Blackhole bh) {
-
-        StringBuilder entry = new StringBuilder("EUR");
-
-        for (int i = 0; i < 700; ++i) { // CHECKSTYLE IGNORE MagicNumber
-            entry.append("5");
-        }
-
-        entry.append(".").append("55");
-
-        boolean isValid = currencyValidator.isValid(entry.toString(), String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
+        boolean isValid = currencyValidator.isValid(longValidEntry.toString(), String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
         bh.consume(isValid);
     }
 
     @Benchmark
     public void validateSingleVeryLongInvalidEntry(Blackhole bh) {
-
-        StringBuilder entry = new StringBuilder("EUR");
-
-        for (int i = 0; i < 700; ++i) { // CHECKSTYLE IGNORE MagicNumber
-            entry.append("5");
-        }
-
-        entry.append(".").append("5").append("A");
-
-        boolean isValid = currencyValidator.isValid(entry.toString(), String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
+        boolean isValid = currencyValidator.isValid(longInvalidEntry.toString(), String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
         bh.consume(isValid);
-
     }
 
     @Benchmark
     public void validateMultipleValidEntry(Blackhole bh) {
-        String[] validEntry = new String[]{
-                "EUR 25.5",
-                "USD 150.0",
-                "GBP 1200.35",
-                "JPY 320.99",
-                "CAD 12.45",
-                "EUR 35.5",
-                "USD 1220.12",
-                "GBP 1200.35",
-                "JPY 999.99",
-                "CAD 15000.45",
-                "EUR 32.5",
-                "USD 1500000.0",
-                "GBP 120000.35",
-                "JPY 3205670.99",
-                "CAD 4512.45",
-                "EUR 166725.5",
-                "USD 152.12",
-                "GBP 450670.50",
-                "JPY 78212.99",
-                "CAD 11167.45",
-                "EUR 167251.24",
-                "USD 444152.12",
-                "GBP 4560.50",
-                "JPY 71212.99",
-                "CAD 168907.45",
-        };
-
         for (String entry : validEntry) {
             boolean isValid = currencyValidator.isValid(entry, String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
             bh.consume(isValid);
@@ -144,34 +153,6 @@ public class CurrencyValidatorBenchmark {
 
     @Benchmark
     public void validateMultipleInvalidEntry(Blackhole bh) {
-        String[] invalidEntry = new String[]{
-                "EUR 25.5A",
-                "USD 150.0B",
-                "GBP 120E0.N5",
-                "JPY 320Q.99",
-                "CAD 12C.45",
-                "EUR 35R.5",
-                "USD 122AA0.12",
-                "GBP 120Y0.35",
-                "JPY 9F99.99",
-                "CAD 150LP00.45",
-                "EUR 32YY.5",
-                "USD 150WW00.0",
-                "GBP 120000.3H",
-                "JPY 32056EQ.99",
-                "CAD 451GHB2.45",
-                "EUR 16672L5.5",
-                "USD 152T.1R2",
-                "GBP 450T670.Y50",
-                "JPY 78PA12.9P",
-                "CAD 11D67.45",
-                "EUR 1ZX251.24",
-                "USD 4OL152.12",
-                "GBP 45CB60.50",
-                "JPY 71MN2.99",
-                "CAD 16ZA07.45",
-        };
-
         for (String entry : invalidEntry) {
             boolean isValid = currencyValidator.isValid(entry, String.valueOf(CurrencyValidator.CURRENCY_FORMAT));
             bh.consume(isValid);
