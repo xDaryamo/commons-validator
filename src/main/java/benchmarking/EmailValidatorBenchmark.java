@@ -99,7 +99,7 @@ public class EmailValidatorBenchmark {
 
         StringBuilder username = new StringBuilder();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1000; i++) { // CHECKSTYLE IGNORE MagicNumber
             username.append("a");
         }
         String email = username.toString() + "@example.com";
