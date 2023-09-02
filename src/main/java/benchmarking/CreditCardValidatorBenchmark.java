@@ -179,13 +179,14 @@ public class CreditCardValidatorBenchmark {
 
     // Benchmark for validating a large data set of credit card numbers
     @Benchmark
-    public void validateLargeDataSet() {
+    public void validateLargeDataSet(Blackhole bh) {
 
         List<String> creditCardNumbers;
         creditCardNumbers = generateLargeDataSet(); // Generate a large data set of credit card numbers
 
         for (String cardNumber : creditCardNumbers) {
-            creditCardValidator.isValid(cardNumber);
+            boolean isValid = creditCardValidator.isValid(cardNumber);
+            bh.consume(isValid);
         }
     }
 
