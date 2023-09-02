@@ -18,86 +18,42 @@ package benchmarking;
 
 import org.apache.commons.validator.routines.CreditCardValidator;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static org.openjdk.jmh.runner.Defaults.MEASUREMENT_ITERATIONS;
 import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 
-@BenchmarkMode(Mode.AverageTime)
+@BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = WARMUP_ITERATIONS, time = 1)
 @Measurement(iterations = MEASUREMENT_ITERATIONS, time = 1)
 @Fork(1)
 @State(Scope.Benchmark)
 public class CreditCardValidatorBenchmark {
 
-    private static final CreditCardValidator CCV = CreditCardValidator.genericCreditCardValidator(); // default card
-    private static final int PARAM = 1000;
-
+    private CreditCardValidator creditCardValidator;
     private static final int THREADS = 4;
-
     private static final int DATASET = 10000;
-    private List<String> creditCardNumbers;
 
     @Setup
     public void setup() {
-        creditCardNumbers = generateLargeDataSet(); // Generate a large data set of credit card numbers
-    }
-
-    @Benchmark
-    public void validateMixedCreditCards() {
-        CCV.isValid("ValidCreditCardNumber1");
-        CCV.isValid("InvalidCreditCardNumber1");
-        //add more if needed
+        creditCardValidator = CreditCardValidator.genericCreditCardValidator(); // default card
     }
 
     // Edge case: Short credit card number (less than 13 digits)
     @Benchmark
     public void validateShortCreditCard() {
-        CCV.isValid("123456789012"); // Example of a short card number
+        creditCardValidator.isValid("123456789012"); // Example of a short card number
     }
 
-    @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateShortCreditCardMulti() {
-        CCV.isValid("123456789012"); // Example of a short card number
-    }
 
     // Edge case: Very long credit card number (more than 19 digits)
     @Benchmark
     public void validateLongCreditCard() {
-        CCV.isValid("12345678901234567890"); // Example of a long card number
-    }
-
-    @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateLongCreditCardMulti() {
-        CCV.isValid("12345678901234567890"); // Example of a long card number
-    }
-
-    // Edge case: Valid credit card number with spaces
-    @Benchmark
-    public void validateCreditCardWithSpaces() {
-        CCV.isValid("4111 1111 1111 1111"); // Example with spaces
-    }
-
-    @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateCreditCardWithSpacesMulti() {
-        CCV.isValid("4111 1111 1111 1111"); // Example with spaces
-    }
-
-    // Edge case: Valid credit card number with dashes
-    @Benchmark
-    public void validateCreditCardWithDashes() {
-        CCV.isValid("4111-1111-1111-1111"); // Example with dashes
-    }
-
-    @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateCreditCardWithDashesMulti() {
-        CCV.isValid("4111-1111-1111-1111"); // Example with dashes
+        creditCardValidator.isValid("12345678901234567890"); // Example of a long card number
     }
 
     // Benchmark for a valid Visa card
@@ -107,11 +63,24 @@ public class CreditCardValidatorBenchmark {
         validator.isValid("4111111111111111"); // Example of a valid Visa card
     }
 
+    // Benchmark for an invalid VisaCard
     @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateValidVisaCardMulti() {
+    public void validateInvalidVisaCard(Blackhole bh) {
         CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.VISA);
-        validator.isValid("4111111111111111"); // Example of a valid Visa card
+
+        Random random = new Random();
+        StringBuilder cardNumber = new StringBuilder("4");
+
+        for (int i = 0; i < 16; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            cardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
+        }
+
+        // Make the last digit of the card number invalid
+        cardNumber.setCharAt(15, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
+
+        boolean isValid = validator.isValid(cardNumber.toString());
+        bh.consume(isValid);
+
     }
 
     // Benchmark for a valid MasterCard
@@ -121,43 +90,58 @@ public class CreditCardValidatorBenchmark {
         validator.isValid("5555555555554444"); // Example of a valid MasterCard
     }
 
+    // Benchmark for an invalid MasterCard
     @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateValidMasterCardMulti() {
+    public void validateInvalidMasterCard(Blackhole bh) {
         CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.MASTERCARD);
-        validator.isValid("5555555555554444"); // Example of a valid MasterCard
+
+        Random random = new Random();
+        StringBuilder cardNumber = new StringBuilder("5");
+
+        for (int i = 0; i < 16; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            cardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
+        }
+
+        // Make the last digit of the card number invalid
+        cardNumber.setCharAt(15, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
+
+        boolean isValid = validator.isValid(cardNumber.toString());
+        bh.consume(isValid);
+
     }
 
     // Benchmark for a valid American Express card
     @Benchmark
-    public void validateValidAmexCard() {
+    public void validateValidAmexCard(Blackhole bh) {
         CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.AMEX);
-        validator.isValid("3782822463PARAM5"); // Example of a valid American Express card
+        boolean isValid = validator.isValid("3782822463PARAM5"); // Example of a valid American Express card
+        bh.consume(isValid);
     }
 
+    // Benchmark for an invalid American Express card
     @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateValidAmexCardMulti() {
+    public void validateInvalidAmexCard(Blackhole bh) {
         CreditCardValidator validator = new CreditCardValidator(CreditCardValidator.AMEX);
-        validator.isValid("3782822463PARAM5"); // Example of a valid American Express card
-    }
 
-    // Benchmark for an invalid card
-    @Benchmark
-    public void validateInvalidCard() {
-        CCV.isValid("1234567890123456"); // Example of an invalid card
-    }
+        Random random = new Random();
+        StringBuilder cardNumber = new StringBuilder("37");
 
-    @Benchmark
-    @OperationsPerInvocation(PARAM)
-    public void validateInvalidCardMulti() {
-        CCV.isValid("1234567890123456"); // Example of an invalid card
+        for (int i = 0; i < 14; ++i) { // CHECKSTYLE IGNORE MagicNumber
+            cardNumber.append(random.nextInt(10)); // CHECKSTYLE IGNORE MagicNumber
+        }
+
+        // Make the last digit of the card number invalid
+        cardNumber.setCharAt(13, (char) (random.nextInt(10) + '0')); // CHECKSTYLE IGNORE MagicNumber
+
+        boolean isValid = validator.isValid(cardNumber.toString());
+        bh.consume(isValid);
+
     }
 
     // Benchmark for concurrent validation with multiple threads
     @Benchmark
     @Threads(THREADS) // Adjust the number of threads as needed
-    public boolean validateConcurrently() throws InterruptedException {
+    public void validateConcurrently(Blackhole bh) throws InterruptedException {
         // Create an array of credit card numbers to validate
         String[] creditCardNumbers = {
                 "4111111111111111", // Valid Visa card
@@ -177,7 +161,7 @@ public class CreditCardValidatorBenchmark {
             final String cardNumber = creditCardNumbers[i];
             final int index = i;
             threads[i] = new Thread(() -> {
-                results[index] = CCV.isValid(cardNumber);
+                results[index] = creditCardValidator.isValid(cardNumber);
             });
             threads[i].start();
         }
@@ -187,20 +171,21 @@ public class CreditCardValidatorBenchmark {
             thread.join();
         }
 
-        // Return the combined result (e.g., whether all credit card numbers are valid)
+        // Consume results
         for (boolean result : results) {
-            if (!result) {
-                return false; // At least one card is invalid
-            }
+            bh.consume(result);
         }
-        return true; // All cards are valid
     }
 
     // Benchmark for validating a large data set of credit card numbers
     @Benchmark
     public void validateLargeDataSet() {
+
+        List<String> creditCardNumbers;
+        creditCardNumbers = generateLargeDataSet(); // Generate a large data set of credit card numbers
+
         for (String cardNumber : creditCardNumbers) {
-            CCV.isValid(cardNumber);
+            creditCardValidator.isValid(cardNumber);
         }
     }
 
@@ -220,6 +205,9 @@ public class CreditCardValidatorBenchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        org.openjdk.jmh.Main.main(args);
+        org.openjdk.jmh.Main.main(new String[]{
+                "-f", "1", // "-f" specifica di eseguire una sola classe di benchmark, "1" indica l'indice della classe
+                "benchmarking.CreditCardValidatorBenchmark" // Sostituire con il nome completo della vostra classe di benchmark
+        });
     }
 }
