@@ -18,12 +18,13 @@ package benchmarking;
 
 import org.apache.commons.validator.routines.*;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
 import static org.openjdk.jmh.runner.Defaults.MEASUREMENT_ITERATIONS;
 import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 
 
-@BenchmarkMode(Mode.AverageTime)
+@BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = WARMUP_ITERATIONS, time = 1)
 @Measurement(iterations = MEASUREMENT_ITERATIONS, time = 1)
 @Fork(1)
@@ -31,113 +32,161 @@ import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 public class EmailValidatorBenchmark {
     private static final int WARMUP_ITERATIONS = 5;
     private static final int MEASUREMENT_ITERATIONS = 5;
-    private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
-
-    // Valid email
-    String validEmail = "jsmith@apache.org";
-
-    // Email with numeric domain
-    String emailWithNumericDomain = "someone@[216.109.118.76]";
-
-    // Email with valid extension
-    String emailWithValidExtension = "jsmith@apache.org";
-
-    String emailWithInvalidExtension = "jsmith@apache.c";
-
-    // Email with dash in the address
-    String emailWithDash = "andy.noble@data-workshop.com";
-
-    // Email with dot at the end
-    String emailWithDotAtEnd = "andy.noble@data-workshop.com.";
-
-    // Email with invalid character
-    String emailWithInvalidCharacter = "andy.noble@\u008fdata-workshop.com";
-
-    // Email with "+" in the address
-    String emailWithPlusSymbol = "foo+bar@i.am.not.in.us.example.com";
-
-    // Email with "+" in the extension
-    String emailWithPlusSymbolExt = "foo+bar@i.am.not.in.us.ex+ample.com";
-
-    // Email with spaces
-    String emailWithSpaces = "joeblow @apache.org";
-
-    // Email with ASCII control characters
-    String emailWithControlCharacters = "foo" + ((char) 1) + "bar@domain.com";
-
-    // Email with localhost allowed
-    EmailValidator validatorAllowLocalhost = EmailValidator.getInstance(true);
-    EmailValidator validatorNotAllowLocalhost = EmailValidator.getInstance(false);
-    String emailLocalhost = "joe@localhost.localdomain";
+    private EmailValidator emailValidator;
 
 
-    @Benchmark
-    public boolean benchmarkEmailValidation() {
-        return EMAIL_VALIDATOR.isValid(validEmail);
+    @Setup
+    public void setup() {
+        emailValidator = EmailValidator.getInstance();
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationWithNumericAddress() {
-        return EMAIL_VALIDATOR.isValid(emailWithNumericDomain);
+    public void validateSingleValidEmail(Blackhole bh) {
+        String email = "test@example.com";
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
+    }
+
+
+    @Benchmark
+    public void validateSingleInvalidEmail(Blackhole bh) {
+        String email = "user@.com";
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationExtension() {
-        return EMAIL_VALIDATOR.isValid(emailWithValidExtension);
+    public void validateShortValidEmail(Blackhole bh) {
+        String email = "a@a.com";
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
+    }
+    @Benchmark
+    public void validateShortInvalidEmail(Blackhole bh) {
+        String email = "a@b";
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationInvalidExtension() {
-        return EMAIL_VALIDATOR.isValid(emailWithInvalidExtension);
+    public void validateLongValidEmail(Blackhole bh) {
+
+        String email = "max_username_len_x64_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com";
+
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationWithDash() {
-        return EMAIL_VALIDATOR.isValid(emailWithDash);
+    public void validateLongInvalidEmail(Blackhole bh) {
+
+
+        String email = "invalidusernamelongerthanallowedbyvalidator123456789012345678901@example.c";
+
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationWithDotAtEnd() {
-        return EMAIL_VALIDATOR.isValid(emailWithDotAtEnd);
+    public void validateVeryLongInvalidEmail(Blackhole bh) {
+
+
+        StringBuilder username = new StringBuilder();
+
+        for (int i = 0; i < 1000; i++) {
+            username.append("a");
+        }
+        String email = username.toString() + "@example.com";
+
+        boolean isValid = emailValidator.isValid(email);
+        bh.consume(isValid);
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationWithInvalidCharacter() {
-        return EMAIL_VALIDATOR.isValid(emailWithInvalidCharacter);
+    public void validateMultipleValidEmails(Blackhole bh) {
+        String[] validEmails = new String[]{
+                "user@example.com",
+                "john.doe@mail.co",
+                "jane.smith@domain.org",
+                "test@example.net",
+                "user1234@subdomain.com",
+                "alice@mywebsite.io",
+                "support@company.com",
+                "contact@webpage.org",
+                "developer@techfirm.net",
+                "info@myblog.com",
+                "contact@forum.org",
+                "user5678@business.co",
+                "marketing@startup.io",
+                "name.lastname@example.info",
+                "customer.service@bigcompany.com",
+                "webmaster@website.org",
+                "team@myteam.co",
+                "contactus@onlinestore.net",
+                "manager@company.org",
+                "sales@shoponline.io",
+                "techsupport@softwarefirm.net",
+                "firstname.lastname@domainname.io",
+                "office@corporation.co",
+                "hello@startupcompany.org",
+                "info@personalblog.net",
+                "customer.support@ecommercestore.io"
+        };
+
+        for (String email : validEmails) {
+            boolean isValid = emailValidator.isValid(email);
+            bh.consume(isValid);
+        }
     }
 
     @Benchmark
-    public boolean benchmarkEmailValidationWithPlusAddress() {
-        return EMAIL_VALIDATOR.isValid(emailWithPlusSymbol);
-    }
+    public void validateMultipleInvalidEmails(Blackhole bh) {
+        String[] invalidEmails = new String[]{
+                "invalidemail",
+                "user@mail",
+                "name@.org",
+                "@example.com",
+                "user@.com",
+                "user@domain.",
+                "user@.io",
+                "user@.company",
+                "user@co",
+                "user@bigcorporation.muchtoolongextension",
+                "user with spaces@example.com",
+                "user@example.c",
+                "user@@example.com",
+                "user@exa^mple.com",
+                "user@_example.com",
+                "user@-example.com",
+                "user@subdomain..com",
+                "user@.example.com",
+                "user@company.c",
+                "user@.com.",
+                "user@company..com",
+                "user@company.c-",
+                "user@company.c_",
+                "user@company.c@",
+                "user@example[dot]com",
+                "user@website(dot)com"
+        };
 
-    @Benchmark
-    public boolean benchmarkEmailValidationWithPlusExtension() {
-        return EMAIL_VALIDATOR.isValid(emailWithPlusSymbolExt);
-    }
-
-    @Benchmark
-    public boolean benchmarkEmailValidationWithSpaces() {
-        return EMAIL_VALIDATOR.isValid(emailWithSpaces);
-    }
-
-    @Benchmark
-    public boolean benchmarkEmailValidationControlChars() {
-        return EMAIL_VALIDATOR.isValid(emailWithControlCharacters);
-    }
-
-    @Benchmark
-    public boolean benchmarkEmailValidationLocalHostAllowed() {
-        return validatorAllowLocalhost.isValid(emailLocalhost);
-    }
-
-    @Benchmark
-    public boolean benchmarkEmailValidationLocalHostNotAllowed() {
-        return validatorNotAllowLocalhost.isValid(emailLocalhost);
+        for (String email : invalidEmails) {
+            boolean isValid = emailValidator.isValid(email);
+            bh.consume(isValid);
+        }
     }
 
     public static void main(String[] args) throws Exception {
-        org.openjdk.jmh.Main.main(args);
+        org.openjdk.jmh.Main.main(new String[]{
+                "-f", "1", // "-f" specifica di eseguire una sola classe di benchmark, "1" indica l'indice della classe
+                "benchmarking.EmailValidatorBenchmark" // Sostituire con il nome completo della vostra classe di benchmark
+        });
     }
 }
 
