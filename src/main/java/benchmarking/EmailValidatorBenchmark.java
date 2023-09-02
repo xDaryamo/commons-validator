@@ -32,12 +32,17 @@ import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 public class EmailValidatorBenchmark {
     private static final int WARMUP_ITERATIONS = 5;
     private static final int MEASUREMENT_ITERATIONS = 5;
-    private EmailValidator emailValidator;
+    private static EmailValidator emailValidator;
+
+    private String[] multipleValidEmails;
+    private String[] multipleInvalidEmails;
 
 
     @Setup
     public void setup() {
         emailValidator = EmailValidator.getInstance();
+        multipleValidEmails = generateValidEmails(1000);
+        multipleInvalidEmails = generateInvalidEmails(1000);
     }
 
     @Benchmark
@@ -99,7 +104,8 @@ public class EmailValidatorBenchmark {
 
         StringBuilder username = new StringBuilder();
 
-        for (int i = 0; i < 1000; i++) {
+        int veryLongUsername = 1000;
+        for (int i = 0; i < veryLongUsername; i++) {
             username.append("a");
         }
         String email = username.toString() + "@example.com";
@@ -110,36 +116,8 @@ public class EmailValidatorBenchmark {
 
     @Benchmark
     public void validateMultipleValidEmails(Blackhole bh) {
-        String[] validEmails = new String[]{
-                "user@example.com",
-                "john.doe@mail.co",
-                "jane.smith@domain.org",
-                "test@example.net",
-                "user1234@subdomain.com",
-                "alice@mywebsite.io",
-                "support@company.com",
-                "contact@webpage.org",
-                "developer@techfirm.net",
-                "info@myblog.com",
-                "contact@forum.org",
-                "user5678@business.co",
-                "marketing@startup.io",
-                "name.lastname@example.info",
-                "customer.service@bigcompany.com",
-                "webmaster@website.org",
-                "team@myteam.co",
-                "contactus@onlinestore.net",
-                "manager@company.org",
-                "sales@shoponline.io",
-                "techsupport@softwarefirm.net",
-                "firstname.lastname@domainname.io",
-                "office@corporation.co",
-                "hello@startupcompany.org",
-                "info@personalblog.net",
-                "customer.support@ecommercestore.io"
-        };
 
-        for (String email : validEmails) {
+        for (String email : multipleValidEmails) {
             boolean isValid = emailValidator.isValid(email);
             bh.consume(isValid);
         }
@@ -147,7 +125,79 @@ public class EmailValidatorBenchmark {
 
     @Benchmark
     public void validateMultipleInvalidEmails(Blackhole bh) {
-        String[] invalidEmails = new String[]{
+        for (String email : multipleInvalidEmails) {
+            boolean isValid = emailValidator.isValid(email);
+            bh.consume(isValid);
+        }
+    }
+    private static String generateValidEmail() {
+        String[] validLocalParts = {
+                "user",
+                "john.doe",
+                "jane.smith",
+                "test",
+                "user1234",
+                "alice",
+                "support",
+                "contact",
+                "developer",
+                "info",
+                "contact",
+                "user5678",
+                "marketing",
+                "name.lastname",
+                "customer.service",
+                "webmaster",
+                "team",
+                "contactus",
+                "manager",
+                "sales",
+                "techsupport",
+                "firstname.lastname",
+                "office",
+                "hello",
+                "info",
+                "customer.support"
+        };
+
+        String[] validDomains = {
+                "example.com",
+                "mail.co",
+                "domain.org",
+                "example.net",
+                "subdomain.com",
+                "mywebsite.io",
+                "company.com",
+                "webpage.org",
+                "techfirm.net",
+                "myblog.com",
+                "forum.org",
+                "business.co",
+                "startup.io",
+                "example.info",
+                "bigcompany.com",
+                "website.org",
+                "myteam.co",
+                "onlinestore.net",
+                "company.org",
+                "shoponline.io",
+                "softwarefirm.net",
+                "domainname.io",
+                "corporation.co",
+                "startupcompany.org",
+                "personalblog.net",
+                "ecommercestore.io"
+        };
+
+        String localPart = validLocalParts[(int) (Math.random() * validLocalParts.length)];
+        String domain = validDomains[(int) (Math.random() * validDomains.length)];
+
+
+        return localPart + "@" + domain;
+    }
+
+    private static String generateInvalidEmail() {
+        String[] invalidEmails = {
                 "invalidemail",
                 "user@mail",
                 "name@.org",
@@ -174,12 +224,36 @@ public class EmailValidatorBenchmark {
                 "user@company.c@",
                 "user@example[dot]com",
                 "user@website(dot)com"
+
         };
 
-        for (String email : invalidEmails) {
-            boolean isValid = emailValidator.isValid(email);
-            bh.consume(isValid);
+        return invalidEmails[(int) (Math.random() * invalidEmails.length)];
+    }
+
+    private static String[] generateValidEmails(int count) {
+
+        String[] emails = new String[count];
+
+        for (int i = 0; i < count; i++) {
+            String email = generateValidEmail();
+            if (emailValidator.isValid(email)) {
+                emails[i] = email;
+            }
         }
+
+        return emails;
+    }
+
+    private static String[] generateInvalidEmails(int count) {
+        String[] emails = new String[count];
+
+        for (int i = 0; i < count; i++) {
+            String email = generateInvalidEmail();
+            if (!emailValidator.isValid(email)) {
+                emails[i] = email;
+            }
+        }
+        return emails;
     }
 
     public static void main(String[] args) throws Exception {
