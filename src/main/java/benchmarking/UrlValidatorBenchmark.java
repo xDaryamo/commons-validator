@@ -19,8 +19,9 @@ package benchmarking;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
+
 import static org.openjdk.jmh.runner.Defaults.MEASUREMENT_ITERATIONS;
 import static org.openjdk.jmh.runner.Defaults.WARMUP_ITERATIONS;
 
@@ -38,8 +39,9 @@ public class UrlValidatorBenchmark {
     private UrlValidator allowAllSchemesValidator;
     private UrlValidator noFragmentsValidator;
     private UrlValidator customSchemeValidator;
-    private List<String> validUrls;
-    private  List<String> invalidUrls;
+    private Set<String> validUrls;
+    private Set<String> invalidUrls;
+    private Set<String> mixedUrls;
     private List<String> validSchemes;
     private  List<String> invalidSchemes;
 
@@ -54,38 +56,15 @@ public class UrlValidatorBenchmark {
         noFragmentsValidator = new UrlValidator(UrlValidator.NO_FRAGMENTS);
         customSchemeValidator = new UrlValidator(new String[]{"customscheme"});
 
-        validUrls = new ArrayList<>();
-        // Add valid URLs to the list
-        validUrls.add("http://www.amazon.com");
-        validUrls.add("https://www.google.com");
-        validUrls.add("ftp://ftp.example.org");
-        validUrls.add("http://www.apache.org");
-        validUrls.add("https://www.github.com");
-        validUrls.add("ftp://ftp.gnu.org");
-        validUrls.add("2001:0db8:85a3:0000:0000:8a2e:0370:7334"); //Full IPv6 Address
-        validUrls.add("2001:0db8:0:0:0:0:0:1"); //Full IPv6 Address
-        validUrls.add("::1");  //Shorthand Notation and Loopback address
-        validUrls.add("fe80::1%eth0"); //Link-local address with zone ID
-        validUrls.add("ff02::1%wlan0"); //Multicast address with zone ID
-        validUrls.add("192.168.0.1"); //IPv4
-        validUrls.add("10.0.0.2"); //IPv4
+        validUrls = generateUniqueURLs(1000); // CHECKSTYLE IGNORE MagicNumber
+        invalidUrls = generateInvalidURLs(1000); // CHECKSTYLE IGNORE MagicNumber
 
-        invalidUrls = new ArrayList<>();
-        // Add invalid URLs to the list
-        invalidUrls.add("www.invalid-url"); // Missing scheme
-        invalidUrls.add("http://"); // Missing host
-        invalidUrls.add("http://example.com:8080/path?query"); // Missing path
-        invalidUrls.add("htp://www.example.com"); // Invalid scheme
-        invalidUrls.add("http://www.example.com:80/<>"); // Invalid characters in path
-        invalidUrls.add("ftp://www.example.com:invalidport"); // Invalid port
-        invalidUrls.add("http://[FEDC:BA98:7654:3210]:80/index.html"); // Missing square brackets
-        invalidUrls.add("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html"); // Extra colon
-        invalidUrls.add("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80:80/index.html"); // Extra colon
-        invalidUrls.add("http://[::1]:80/index.html"); // Valid IPv6 but missing square brackets
-        invalidUrls.add("192.168.0.300"); // Invalid range
-        invalidUrls.add("172.16.0.256");   // Invalid range
-        invalidUrls.add("10.0.0.0.1");     // Extra digits
-        invalidUrls.add("192.168.1");       // Incomplete
+        mixedUrls = new HashSet<>();
+        Set<String> tmpValid = generateUniqueURLs(500); // CHECKSTYLE IGNORE MagicNumber
+        Set<String> tmpInvalid = generateInvalidURLs(500); // CHECKSTYLE IGNORE MagicNumber
+        mixedUrls.addAll(tmpValid);
+        mixedUrls.addAll(tmpInvalid);
+        Collections.shuffle(Arrays.asList(mixedUrls.toArray()));
 
         validSchemes = new ArrayList<>();
         // Add valid URL schemes to the list
@@ -106,6 +85,81 @@ public class UrlValidatorBenchmark {
         invalidSchemes.add("ht-tp");   // Dash not allowed
         invalidSchemes.add("ft p");    // Space not allowed
         invalidSchemes.add("123");     // Numbers not allowed as scheme
+    }
+
+
+    public static Set<String> generateUniqueURLs(int count) {
+        Set<String> uniqueURLs = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            String url;
+            do {
+                url = generateRandomURL();
+            } while (uniqueURLs.contains(url));
+            uniqueURLs.add(url);
+        }
+        return uniqueURLs;
+    }
+
+    private static String generateRandomURL() {
+        // Define URL components
+        String[] schemes = {"http://", "https://", "ftp://"};
+        String[] domains = {"example.com", "google.com", "yahoo.com", "github.com", "stackoverflow.com"};
+        String[] paths = {"/page1", "/page2", "/index.html", "/docs", "/blog"};
+        String[] queryParameters = {"param1=value1&param2=value2", "", "query"};
+        String[] ipv4Addresses = {"192.168.1.1", "10.0.0.1", "172.16.0.1", "8.8.8.8"};
+        String[] ipv6Addresses = {"[2001:0db8:85a3:0000:0000:8a2e:0370:7334]", "[::1]", "[2001:0db8::1]", "[2606:2800:220:1:248:1893:25c8:1946]"};
+
+        // Generate a random URL
+        String scheme = schemes[(int) (Math.random() * schemes.length)];
+        String domain = domains[(int) (Math.random() * domains.length)];
+        String path = paths[(int) (Math.random() * paths.length)];
+        String query = queryParameters[(int) (Math.random() * queryParameters.length)];
+
+        String address = Math.random() < 0.5 ? ipv4Addresses[(int) (Math.random() * ipv4Addresses.length)] // CHECKSTYLE IGNORE MagicNumber
+                : ipv6Addresses[(int) (Math.random() * ipv6Addresses.length)];
+
+        return scheme + domain + path + "?" + query + address;
+    }
+
+    public static Set<String> generateInvalidURLs(int count) {
+        Set<String> invalidURLs = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            String url;
+            do {
+                url = generateRandomInvalidURL();
+            } while (invalidURLs.contains(url));
+            invalidURLs.add(url);
+        }
+        return invalidURLs;
+    }
+
+    private static String generateRandomInvalidURL() {
+        // Define invalid URL components
+        String[] invalidURLs = {
+                "not-a-url", // Not a valid URL
+                "htt://example.com", // Invalid scheme
+                "http://example.c", // Invalid domain
+                "http://example.com:port", // Invalid port
+                "http:/example.com", // Missing double slashes after scheme
+                "http://[::1]8000", // Invalid port with IPv6
+                "http://example.com/ pa th", // Spaces in the path
+                "http://example.com?query= value", // Spaces in query parameters
+                "http://[invalid-ipv6]", // Invalid IPv6 address
+                "http://example.com#fragment#", // Multiple fragments
+                "http://example.com?query#fragment", // Invalid mix of query and fragment
+                "://example.com", // Missing scheme
+                "http://", // Missing domain
+                "http://localhost::80", // Invalid double colons in IPv6
+                "http://[::1]::80", // Invalid double colons in IPv6 with port
+                "http://[::1]:80:90", // Invalid multiple colons in port
+                "http://[::1]:abc", // Invalid characters in port
+                "http://example..com", // Double dots in domain
+                "http://[::1]:[::1]", // IPv6 address as port
+                "http://example.com::80", // Double colons after domain
+                "http://example.com:123456" // Port out of valid range
+        };
+
+        return invalidURLs[(int) (Math.random() * invalidURLs.length)];
     }
 
     //Basic Url Validation
@@ -187,7 +241,7 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
-    public void validateMultipleValidMixedUrl(Blackhole bh) {
+    public void validateSetValidUrl(Blackhole bh) {
         for(String url: validUrls){
             boolean isValid = urlValidator.isValid(url);
             bh.consume(isValid);
@@ -195,8 +249,16 @@ public class UrlValidatorBenchmark {
     }
 
     @Benchmark
-    public void validateMultipleInalidMixedUrl(Blackhole bh) {
+    public void validateSetInvalidUrl(Blackhole bh) {
         for(String url: invalidUrls){
+            boolean isValid = urlValidator.isValid(url);
+            bh.consume(isValid);
+        }
+    }
+
+    @Benchmark
+    public void validateSetMixedUrl(Blackhole bh) {
+        for(String url: mixedUrls){
             boolean isValid = urlValidator.isValid(url);
             bh.consume(isValid);
         }
