@@ -89,10 +89,10 @@ public class CalendarValidatorBenchmark {
         Random random = new Random();
 
         Calendar startDate = Calendar.getInstance();
-        startDate.set(2000, Calendar.JANUARY, 1);
+        startDate.set(2000, Calendar.JANUARY, 1);// CHECKSTYLE IGNORE MagicNumber
 
         Calendar endDate = Calendar.getInstance();
-        endDate.set(2022, Calendar.DECEMBER, 31);
+        endDate.set(2022, Calendar.DECEMBER, 31);// CHECKSTYLE IGNORE MagicNumber
 
         long startMillis = startDate.getTimeInMillis();
         long endMillis = endDate.getTimeInMillis();
@@ -114,16 +114,16 @@ public class CalendarValidatorBenchmark {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         for (int i = 0; i < count; i++) {
-            int randomYear = 2023 + random.nextInt(10); // Genera un anno tra 2023 e 2032
-            int randomMonth = 1 + random.nextInt(12); // Genera un mese tra 1 e 12
-            int randomDay = 1 + random.nextInt(31); // Genera un giorno tra 1 e 31
+            int randomYear = 2023 + random.nextInt(10); // Genera un anno tra 2023 e 2032 // CHECKSTYLE IGNORE MagicNumber
+            int randomMonth = 1 + random.nextInt(12); // Genera un mese tra 1 e 12  // CHECKSTYLE IGNORE MagicNumber
+            int randomDay = 1 + random.nextInt(31); // Genera un giorno tra 1 e 31 // CHECKSTYLE IGNORE MagicNumber
 
             // Simulare errori comuni
-            if (randomMonth > 12) {
-                randomMonth = random.nextInt(12) + 13; // Genera un mese tra 13 e 24
+            if (randomMonth > 12) { // CHECKSTYLE IGNORE MagicNumber
+                randomMonth = random.nextInt(12) + 13; // Genera un mese tra 13 e 24 // CHECKSTYLE IGNORE MagicNumber
             }
-            if (randomDay > 31) {
-                randomDay = random.nextInt(31) + 32; // Genera un giorno tra 32 e 62
+            if (randomDay > 31) { // CHECKSTYLE IGNORE MagicNumber
+                randomDay = random.nextInt(31) + 32; // Genera un giorno tra 32 e 62 // CHECKSTYLE IGNORE MagicNumber
             }
 
             String date = String.format("%04d-%02d-%02d", randomYear, randomMonth, randomDay);

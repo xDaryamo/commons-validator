@@ -41,8 +41,8 @@ public class EmailValidatorBenchmark {
     @Setup
     public void setup() {
         emailValidator = EmailValidator.getInstance();
-        multipleValidEmails = generateValidEmails(1000);
-        multipleInvalidEmails = generateInvalidEmails(1000);
+        multipleValidEmails = generateValidEmails(1000); // CHECKSTYLE IGNORE MagicNumber
+        multipleInvalidEmails = generateInvalidEmails(1000); // CHECKSTYLE IGNORE MagicNumber
     }
 
     @Benchmark
@@ -104,7 +104,7 @@ public class EmailValidatorBenchmark {
 
         StringBuilder username = new StringBuilder();
 
-        int veryLongUsername = 1000;
+        int veryLongUsername = 1000; // CHECKSTYLE IGNORE MagicNumber
         for (int i = 0; i < veryLongUsername; i++) {
             username.append("a");
         }
