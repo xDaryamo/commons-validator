@@ -62,7 +62,7 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
 
-  </properties>
+  </properties> 
 
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/commons-validator</connection>
@@ -93,7 +93,7 @@
           <include>NOTICE.txt</include>
           <include>LICENSE.txt</include>
         </includes>
-      </resource>
+       </resource>
       <resource>
         <directory>${basedir}/src/main/resources</directory>
       </resource>
@@ -274,25 +274,6 @@
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
       <version>1.36</version>
-    </dependency>
-    <dependency>
-      <groupId>org.evosuite</groupId>
-      <artifactId>evosuite-standalone-runtime</artifactId>
-      <version>1.0.6</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest -->
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>4.11.0</version>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
@@ -495,7 +476,7 @@
       <email>ggregory at apache.org</email>
       <url>https://www.garygregory.com</url>
       <organization>The Apache Software Foundation</organization>
-      <organizationUrl>https://www.apache.org/</organizationUrl>
+      <organizationUrl>https://www.apache.org/</organizationUrl>      
       <roles>
         <role>PMC Member</role>
       </roles>
