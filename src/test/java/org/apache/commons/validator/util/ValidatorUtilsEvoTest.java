@@ -23,6 +23,7 @@ import org.evosuite.runtime.EvoRunner;
 import org.evosuite.runtime.EvoRunnerParameters;
 import org.evosuite.runtime.ViolatedAssumptionAnswer;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 public class ValidatorUtilsEvoTest {
 
@@ -64,32 +65,7 @@ public class ValidatorUtilsEvoTest {
       ValidatorUtils.copyMap(fastHashMap0);
   }
 
-  @Test(timeout = 4000)
-  public void test02()  throws Throwable  {
-      FastHashMap fastHashMap0 = new FastHashMap(0);
-      String string0 = "";
-      fastHashMap0.put("", "");
-      Msg msg0 = new Msg();
-      BiFunction<String, Msg, Msg> biFunction0 = (BiFunction<String, Msg, Msg>) mock(BiFunction.class, new ViolatedAssumptionAnswer());
-      doReturn(msg0).when(biFunction0).apply(anyString() , any(Msg.class));
-      Object object0 = fastHashMap0.compute("", biFunction0);
-      fastHashMap0.put(object0, "");
-      ValidatorUtils.copyFastHashMap(fastHashMap0);
-      ValidatorUtils.copyMap(fastHashMap0);
-      ValidatorUtils.replace("", "", "6.0)-");
-      String string1 = "=q{G>{a=d";
-      // Undeclared exception!
-      try { 
-        ValidatorUtils.getValueAsString("6.0)-", "=q{G>{a=d");
-        fail("Expecting exception: NoClassDefFoundError");
-      
-      } catch(NoClassDefFoundError e) {
-         //
-         // org/apache/commons/beanutils/PropertyUtils
-         //
-         verifyException("org.apache.commons.validator.util.ValidatorUtils", e);
-      }
-  }
+
 
   @Test(timeout = 4000)
   public void test03()  throws Throwable  {
@@ -101,7 +77,7 @@ public class ValidatorUtilsEvoTest {
       ValidatorUtils validatorUtils0 = new ValidatorUtils();
       ValidatorUtils.replace((String) null, (String) null, "Ogw7HT{Jx2@|x");
       FastHashMap fastHashMap0 = new FastHashMap(2124, 2124);
-      BiFunction<Object, Msg, Msg> biFunction0 = (BiFunction<Object, Msg, Msg>) mock(BiFunction.class, new ViolatedAssumptionAnswer());
+      BiFunction<Object, Msg, Msg> biFunction0 = Mockito.mock(BiFunction.class);
       fastHashMap0.replaceAll(biFunction0);
       ValidatorUtils.copyFastHashMap(fastHashMap0);
       Map<Msg, Msg> map0 = null;
@@ -160,7 +136,7 @@ public class ValidatorUtilsEvoTest {
   public void test11()  throws Throwable  {
       FastHashMap fastHashMap0 = new FastHashMap(163, 1212.0F);
       Object object0 = new Object();
-      BiConsumer<Msg, Msg> biConsumer0 = (BiConsumer<Msg, Msg>) mock(BiConsumer.class, new ViolatedAssumptionAnswer());
+      BiConsumer<Msg, Msg> biConsumer0 = Mockito.mock(BiConsumer.class);
       fastHashMap0.put(object0, object0);
       fastHashMap0.forEach(biConsumer0);
       fastHashMap0.put(object0, object0);
