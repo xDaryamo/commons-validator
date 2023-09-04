@@ -276,6 +276,14 @@
       <version>1.36</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.evosuite/evosuite-runtime -->
+    <dependency>
+      <groupId>org.evosuite</groupId>
+      <artifactId>evosuite-runtime</artifactId>
+      <version>1.0.6</version>
+    </dependency>
+
+
   </dependencies>
 
   <reporting>
