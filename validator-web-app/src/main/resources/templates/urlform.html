@@ -1,0 +1,87 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Type Selection</title>
+    <style>
+        /* Initially hide all input fields */
+        .input-field {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Validation Type Selection</h1>
+<form action="/validate-url" method="post">
+    <label for="validationType">Select Validation Type:</label>
+    <select id="validationType" name="validationType">
+        <option value="url">Standard URL</option>
+        <option value="ipv4">IPv4 Address</option>
+        <option value="ipv6">IPv6 Address</option>
+    </select>
+    <br>
+
+    <!-- Input fields for URL, IPv4, and IPv6 -->
+    <div id="urlInput" class="input-field">
+        <label for="url">Enter URL:</label>
+        <input type="text" id="url" name="url" class="url" required>
+    </div>
+
+    <div id="ipv4Input" class="input-field">
+        <label for="ipv4">Enter IPv4 Address:</label>
+        <input type="text" id="ipv4" name="ipv4" class="ipv4">
+    </div>
+
+    <div id="ipv6Input" class="input-field">
+        <label for="ipv6">Enter IPv6 Address:</label>
+        <input type="text" id="ipv6" name="ipv6" class="ipv6">
+    </div>
+
+    <button type="submit">Validate</button>
+</form>
+
+<script>
+    // Get references to the select element and input fields
+    const validationTypeSelect = document.getElementById("validationType");
+    const urlInput = document.getElementById("urlInput");
+    const ipv4Input = document.getElementById("ipv4Input");
+    const ipv6Input = document.getElementById("ipv6Input");
+
+    // Add an event listener to the select element
+    validationTypeSelect.addEventListener("change", function () {
+        // Hide all input fields
+        urlInput.style.display = "none";
+        ipv4Input.style.display = "none";
+        ipv6Input.style.display = "none";
+
+        // Show the selected input field based on the chosen option
+        const selectedOption = this.value;
+        if (selectedOption === "url") {
+            urlInput.style.display = "block";
+        } else if (selectedOption === "ipv4") {
+            ipv4Input.style.display = "block";
+        } else if (selectedOption === "ipv6") {
+            ipv6Input.style.display = "block";
+        }
+    });
+</script>
+</body>
+</html>
+
