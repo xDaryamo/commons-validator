@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Email Validation</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+<div class="container">
+    <h1>Email Validation</h1>
+    <form class="form" th:action="@{/email-validation}" method="post">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" required /><br /><br />
+
+        <input type="submit" value="Submit" />
+    </form>
+    <div th:if="${successMessage}" th:text="${successMessage}" class="success-message"></div>
+    <div th:if="${errorMessage}" th:text="${errorMessage}" class="error-message"></div>
+</div>
+</body>
+</html>
