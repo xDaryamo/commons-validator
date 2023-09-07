@@ -18,13 +18,20 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Menu Home</title>
+  <title>IBAN Validation</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
 <body>
-<ul>
-  <li><a th:href="@{/email-validation}">Email Validation</a></li>
-  <li><a th:href="@{/iban-validation}">IBAN Validation</a></li>
-  <!-- Aggiungi ulteriori link alle tue pagine qui -->
-</ul>
+<div class="container">
+  <h1>IBAN Validation</h1>
+  <form class="form" th:action="@{/iban-validation}" method="post">
+    <label for="iban">IBAN:</label>
+    <input type="text" id="iban" name="iban" required /><br /><br />
+
+    <input type="submit" value="Submit" />
+  </form>
+  <div th:if="${successMessage}" th:text="${successMessage}" class="success-message"></div>
+  <div th:if="${errorMessage}" th:text="${errorMessage}" class="error-message"></div>
+</div>
 </body>
 </html>
