@@ -69,12 +69,16 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
+
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.7</version>
+            <version>1.8-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/commons-validator-1.8-SNAPSHOT.jar</systemPath>
         </dependency>
+
+
 
     </dependencies>
 
@@ -84,6 +88,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
 

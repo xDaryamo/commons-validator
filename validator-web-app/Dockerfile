@@ -19,6 +19,8 @@ WORKDIR /app
 RUN groupadd -r myuser && useradd --create-home -r -g myuser myuser
 RUN usermod -u 1024 myuser; groupmod -g 1024 myuser;
 
+
+COPY commons-validator-1.8-SNAPSHOT.jar /app/commons-validator-1.8-SNAPSHOT.jar
 COPY ./pom.xml ./
 
 RUN mvn dependency:resolve
