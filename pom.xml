@@ -56,7 +56,19 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+
     <commons.osgi.import>
+      org.tukaani.xz;resolution:=optional,
+      org.brotli.dec;resolution:=optional,
+      com.github.luben.zstd;resolution:=optional,
+      org.objectweb.asm;resolution:=optional,
+      javax.crypto.*;resolution:=optional,
+      org.openjdk.jmh.annotations;resolution:=optional,
+      org.openjdk.jmh.infra;resolution:=optional,
+      org.openjdk.jmh.results;resolution:=optional,
+      org.openjdk.jmh.runner;resolution:=optional,
+      org.openjdk.jmh.runner.options;resolution:=optional,
+      org.openjdk.jmh.util;resolution:=optional,
       org.springframework.boot;resolution:=optional,
       org.springframework.boot.autoconfigure;resolution:=optional,
       org.springframework.context;resolution:=optional,
@@ -67,7 +79,7 @@
       org.springframework.http;resolution:=optional,
       org.springframework.web.multipart;resolution:=optional,
       *
-    </commons.osgi.import><commons.release.isDistModule>true</commons.release.isDistModule>
+    </commons.osgi.import>
 
 
     <!--SonarCloud CI-->
@@ -85,6 +97,7 @@
     <url>https://gitbox.apache.org/repos/asf/commons-validator</url>
   </scm>
 
+
   <issueManagement>
     <system>jira</system>
     <url>http://issues.apache.org/jira/browse/VALIDATOR</url>
@@ -101,15 +114,15 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <!-- Import dependency management from Spring Boot -->
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>3.1.0</version>
+        <version>2.6.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
 
   <build>
     <defaultGoal>clean verify apache-rat:check japicmp:cmp checkstyle:check javadoc:javadoc</defaultGoal>
@@ -306,12 +319,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
+      <version>2.6.4</version>
     </dependency>
 
     <dependency>
@@ -319,11 +327,6 @@
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>5.3.10</version>
-    </dependency>
   </dependencies>
 
 
