@@ -12,10 +12,29 @@
 #WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #See the License for the specific language governing permissions and
 #limitations under the License.
-FROM maven:3.9.0-eclipse-temurin-17 as base
+FROM maven:3.9.2-eclipse-temurin-17 as base
 WORKDIR /app
-COPY src ./
+
+# Add a non-root user
+RUN groupadd -r myuser && useradd --create-home -r -g myuser myuser
+RUN usermod -u 1024 myuser; groupmod -g 1024 myuser;
+
 COPY pom.xml ./
 
-CMD ["mvn", "install", "-Drat.skip=true"]
+RUN mvn dependency:resolve
+RUN mkdir target
+RUN chown myuser target
+
+COPY src ./src
+
+# From "root" user to "myuser" user
+USER myuser
+
+RUN mvn package
+###################################################################
+FROM eclipse-temurin:17-jre-jammy as production
+
+EXPOSE 8080/tcp
+COPY --from=base /app/target/commons-validator-1.8-SNAPSHOT.jar /commons-validator-webapp.jar
+CMD ["java", "-jar", "/commons-validator-webapp.jar"]
 
