@@ -17,7 +17,7 @@ name: docker-image
 on:
   push:
     branches:
-      - "master"
+      - "webapp"
 
 jobs:
   build:
