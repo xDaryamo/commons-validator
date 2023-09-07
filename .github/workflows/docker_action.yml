@@ -40,6 +40,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./validator-web-app
-          file: ./Dockerfile
+          file: ./validator-web-app/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:webapp
