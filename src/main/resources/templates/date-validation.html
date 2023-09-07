@@ -14,23 +14,23 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Home</title>
+  <title>Date Validation</title>
   <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
 <body>
 <div class="container">
-  <h1>Validation Pages</h1>
-  <ul class="link-list">
-    <li><a th:href="@{/email-validation}">Email Validation</a></li>
-    <li><a th:href="@{/iban-validation}">IBAN Validation</a></li>
-    <li><a th:href="@{/credit-card-validation}">Credit Card Validation</a></li>
-    <li><a th:href="@{/date-validation}">Date Validation</a></li>
-    <li><a th:href="@{/url-validation}">URL Validation</a></li>
-  </ul>
+  <h1>Date Validation</h1>
+  <form class="form" th:action="@{/date-validation}" method="post">
+    <label for="date">Date (DD/MM/YYYY):</label>
+    <input type="text" id="date" name="date" required /><br /><br />
+
+    <input type="submit" value="Submit" />
+  </form>
+  <div th:if="${successMessage}" th:text="${successMessage}" class="success-message"></div>
+  <div th:if="${errorMessage}" th:text="${errorMessage}" class="error-message"></div>
 </div>
 </body>
 </html>

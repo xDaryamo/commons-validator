@@ -18,19 +18,20 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Home</title>
-  <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <title>Credit Card Validation</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
 <body>
 <div class="container">
-  <h1>Validation Pages</h1>
-  <ul class="link-list">
-    <li><a th:href="@{/email-validation}">Email Validation</a></li>
-    <li><a th:href="@{/iban-validation}">IBAN Validation</a></li>
-    <li><a th:href="@{/credit-card-validation}">Credit Card Validation</a></li>
-    <li><a th:href="@{/date-validation}">Date Validation</a></li>
-    <li><a th:href="@{/url-validation}">URL Validation</a></li>
-  </ul>
+    <h1>Credit Card Validation</h1>
+    <form class="form" th:action="@{/credit-card-validation}" method="post">
+        <label for="creditCardNumber">Credit Card Number:</label>
+        <input type="text" id="creditCardNumber" name="creditCardNumber" required /><br /><br />
+
+        <input type="submit" value="Submit" />
+    </form>
+    <div th:if="${successMessage}" th:text="${successMessage}" class="success-message"></div>
+    <div th:if="${errorMessage}" th:text="${errorMessage}" class="error-message"></div>
 </div>
 </body>
 </html>

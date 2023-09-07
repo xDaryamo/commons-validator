@@ -79,3 +79,28 @@ input[type="submit"] {
     margin-top: 10px;
     font-weight: bold;
 }
+
+h1 {
+    font-size: 24px;
+}
+
+/* Stili per la lista di link */
+.link-list {
+    list-style: none;
+    padding: 0;
+}
+
+.link-list li {
+    margin-bottom: 10px;
+}
+
+.link-list a {
+    text-decoration: none;
+    font-size: 18px;
+    color: #007bff;
+}
+
+.link-list a:hover {
+    color: #58a2ea;
+    transition: 0.5s;
+}
