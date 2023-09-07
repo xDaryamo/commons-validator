@@ -15,41 +15,42 @@
  *  limitations under the License.
  */
 
-package webapp;
+package com.webapp.validatorwebapp;
 
 import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.commons.validator.routines.IBANValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller
-public class IbanValidationController {
 
-    @GetMapping("/iban-validation")
+@Controller
+public class EmailValidationController {
+
+    @GetMapping("/email-validation")
     public ModelAndView emailValidation() {
-        return new ModelAndView("iban-validation");
+        return new ModelAndView("email-validation");
 
     }
 
 
-    @PostMapping("/iban-validation")
-    public ModelAndView emailValidationSubmit(String iban) {
+    @PostMapping("/email-validation")
+    public ModelAndView emailValidationSubmit(String email) {
         String successMessage = null;
         String errorMessage = null;
 
-        if (IBANValidator.getInstance().isValid(iban)) {
-            successMessage = "IBAN valido!";
+        if (EmailValidator.getInstance().isValid(email)) {
+            successMessage = "Email valida!";
 
         } else {
-            errorMessage = "IBAN non valido!";
+            errorMessage = "Email non valida!";
         }
 
-        ModelAndView modelAndView = new ModelAndView("iban-validation");
+        ModelAndView modelAndView = new ModelAndView("email-validation");
         modelAndView.addObject("successMessage", successMessage);
         modelAndView.addObject("errorMessage", errorMessage);
 
         return modelAndView;
     }
+
 }

@@ -15,40 +15,39 @@
  *  limitations under the License.
  */
 
-package webapp;
+package com.webapp.validatorwebapp;
 
-import org.apache.commons.validator.routines.DateValidator;
+
+import org.apache.commons.validator.routines.CreditCardValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Locale;
 
 @Controller
-public class DateValidationController {
+public class CreditCardValidationController {
 
-    @GetMapping("/date-validation")
-    public ModelAndView dateValidationForm() {
-        return new ModelAndView("date-validation");
+    @GetMapping("/credit-card-validation")
+    public ModelAndView creditCardValidationForm() {
+        return new ModelAndView("credit-card-validation");
     }
 
-    @PostMapping("/date-validation")
-    public ModelAndView dateValidationSubmit(String date) {
+    @PostMapping("/credit-card-validation")
+    public ModelAndView creditCardValidationSubmit(String creditCardNumber) {
         String successMessage = null;
         String errorMessage = null;
 
-        // Esegui la validazione della data utilizzando la libreria esterna
-        DateValidator dateValidator = DateValidator.getInstance();
-        if (dateValidator.isValid(date, "dd/MM/yyyy", Locale.ITALIAN)) {
-            // Data valida, esegui le operazioni necessarie
-            successMessage = "Data valida!";
+        CreditCardValidator creditCardValidator = new CreditCardValidator();
+        if (creditCardValidator.isValid(creditCardNumber)) {
+            // Carta di credito valida, esegui le operazioni necessarie
+            successMessage = "Carta di credito valida!";
         } else {
-            // Data non valida, mostra un messaggio di errore
-            errorMessage = "Data non valida!";
+            // Carta di credito non valida, mostra un messaggio di errore
+            errorMessage = "Carta di credito non valida!";
         }
 
-        ModelAndView modelAndView = new ModelAndView("date-validation");
+        ModelAndView modelAndView = new ModelAndView("credit-card-validation");
         modelAndView.addObject("successMessage", successMessage);
         modelAndView.addObject("errorMessage", errorMessage);
 

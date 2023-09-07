@@ -86,7 +86,7 @@
     <sonar.organization>xdaryamo</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
-    <start.class>webapp.App</start.class>
+    <start.class>com.webapp.validatorwebapp</start.class>
     <animal.sniffer.skip>true</animal.sniffer.skip>
 
   </properties> 

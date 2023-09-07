@@ -15,39 +15,38 @@
  *  limitations under the License.
  */
 
-package webapp;
+package com.webapp.validatorwebapp;
 
-
-import org.apache.commons.validator.routines.CreditCardValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-
 @Controller
-public class CreditCardValidationController {
+public class UrlValidationController {
 
-    @GetMapping("/credit-card-validation")
-    public ModelAndView creditCardValidationForm() {
-        return new ModelAndView("credit-card-validation");
+    @GetMapping("/url-validation")
+    public ModelAndView urlValidationForm() {
+        return new ModelAndView("url-validation");
     }
 
-    @PostMapping("/credit-card-validation")
-    public ModelAndView creditCardValidationSubmit(String creditCardNumber) {
+    @PostMapping("/url-validation")
+    public ModelAndView urlValidationSubmit(String url) {
         String successMessage = null;
         String errorMessage = null;
 
-        CreditCardValidator creditCardValidator = new CreditCardValidator();
-        if (creditCardValidator.isValid(creditCardNumber)) {
-            // Carta di credito valida, esegui le operazioni necessarie
-            successMessage = "Carta di credito valida!";
+        // Esegui la validazione dell'URL utilizzando la libreria esterna
+        UrlValidator urlValidator = new UrlValidator();
+        if (urlValidator.isValid(url)) {
+            // URL valido, esegui le operazioni necessarie
+            successMessage = "URL valido!";
         } else {
-            // Carta di credito non valida, mostra un messaggio di errore
-            errorMessage = "Carta di credito non valida!";
+            // URL non valido, mostra un messaggio di errore
+            errorMessage = "URL non valido!";
         }
 
-        ModelAndView modelAndView = new ModelAndView("credit-card-validation");
+        ModelAndView modelAndView = new ModelAndView("url-validation");
         modelAndView.addObject("successMessage", successMessage);
         modelAndView.addObject("errorMessage", errorMessage);
 

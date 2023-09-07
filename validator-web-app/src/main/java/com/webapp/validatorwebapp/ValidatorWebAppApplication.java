@@ -14,15 +14,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package webapp;
+package com.webapp.validatorwebapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class App {
+public class ValidatorWebAppApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(ValidatorWebAppApplication.class, args);
     }
+
 }

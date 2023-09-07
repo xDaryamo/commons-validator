@@ -15,38 +15,40 @@
  *  limitations under the License.
  */
 
-package webapp;
+package com.webapp.validatorwebapp;
 
-import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.commons.validator.routines.DateValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller
-public class UrlValidationController {
+import java.util.Locale;
 
-    @GetMapping("/url-validation")
-    public ModelAndView urlValidationForm() {
-        return new ModelAndView("url-validation");
+@Controller
+public class DateValidationController {
+
+    @GetMapping("/date-validation")
+    public ModelAndView dateValidationForm() {
+        return new ModelAndView("date-validation");
     }
 
-    @PostMapping("/url-validation")
-    public ModelAndView urlValidationSubmit(String url) {
+    @PostMapping("/date-validation")
+    public ModelAndView dateValidationSubmit(String date) {
         String successMessage = null;
         String errorMessage = null;
 
-        // Esegui la validazione dell'URL utilizzando la libreria esterna
-        UrlValidator urlValidator = new UrlValidator();
-        if (urlValidator.isValid(url)) {
-            // URL valido, esegui le operazioni necessarie
-            successMessage = "URL valido!";
+        // Esegui la validazione della data utilizzando la libreria esterna
+        DateValidator dateValidator = DateValidator.getInstance();
+        if (dateValidator.isValid(date, "dd/MM/yyyy", Locale.ITALIAN)) {
+            // Data valida, esegui le operazioni necessarie
+            successMessage = "Data valida!";
         } else {
-            // URL non valido, mostra un messaggio di errore
-            errorMessage = "URL non valido!";
+            // Data non valida, mostra un messaggio di errore
+            errorMessage = "Data non valida!";
         }
 
-        ModelAndView modelAndView = new ModelAndView("url-validation");
+        ModelAndView modelAndView = new ModelAndView("date-validation");
         modelAndView.addObject("successMessage", successMessage);
         modelAndView.addObject("errorMessage", errorMessage);
 
