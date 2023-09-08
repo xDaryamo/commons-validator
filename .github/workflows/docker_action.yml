@@ -42,4 +42,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:evosuite-randoop
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/commons-validator:evosuite-randoop
