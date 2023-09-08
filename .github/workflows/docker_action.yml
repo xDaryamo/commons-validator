@@ -42,4 +42,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:benchmark
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/commons-validator:benchmark
