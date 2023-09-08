@@ -42,4 +42,4 @@ jobs:
           context: ./validator-web-app
           file: ./validator-web-app/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:webapp
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/commons-validator:webapp
